@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, ReactNode } from 'react';
 import { getProvider } from '../services/phantom/connection';
-import { Provider } from '@interfaces/phantom/phantom';
+import { Provider } from '../interfaces/phantom/phantom';
 import { PublicKey } from '@solana/web3.js';
 
 interface PhantomContextType {
@@ -19,17 +19,35 @@ export function PhantomProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (provider) {
+
+      // if provider dose not have a publicKey, connect to the wallet
+      if (!provider.publicKey) {
+        provider.connect()
+      }
+
       // Listen for connect events
       provider.on("connect", (publicKey: PublicKey) => {
-        console.log('connect publicKey',publicKey);
         setPublicKey(publicKey.toString());
       });
 
-      // Listen for disconnect events
       provider.on("disconnect", () => {
-        console.log('disconnect');
         setPublicKey(null);
       });
+
+      provider.on("accountChanged", (publicKey: PublicKey | null) => {
+        if (publicKey) {
+          setPublicKey(publicKey.toString());
+        } else {
+          setPublicKey(null);
+        }
+      });
+
+      // Cleanup function
+      return () => {
+        provider.removeAllListeners("connect");
+        provider.removeAllListeners("disconnect");
+        provider.removeAllListeners("accountChanged");
+      };
     }
   }, [provider]);
 

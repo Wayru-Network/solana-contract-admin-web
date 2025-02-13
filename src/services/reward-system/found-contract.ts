@@ -1,6 +1,6 @@
-import { RewardSystem } from "@/interfaces/reward-system/reward_system";
+import { RewardSystem } from "../../interfaces/reward-system/reward_system";
 import { Program } from "@coral-xyz/anchor";
-import { Provider } from "@/interfaces/phantom/phantom";
+import { Provider } from "../../interfaces/phantom/phantom";
 
 import { BN } from "@coral-xyz/anchor";
 import {
@@ -15,8 +15,10 @@ import {
     TransactionInstruction,
     SystemProgram,
     Connection,
-    clusterApiUrl
+    clusterApiUrl,
 } from "@solana/web3.js";
+import { CONSTANTS } from "src/constants";
+import { getTxStatus } from "../solana";
 
 interface FundTokenStorageProps {
     program: Program<RewardSystem>;
@@ -24,17 +26,20 @@ interface FundTokenStorageProps {
     mint: PublicKey;
     amount: BN;
     provider: Provider;
+    network?: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 }
 
-export const depositToken = async ({
+export const FundContractToken = async ({
     program,
     userPublicKey,
     mint,
     amount,
-    provider
+    provider,
+    network
 }: FundTokenStorageProps) => {
     try {
-        const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
 
         // Get token storage PDA
         const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(
@@ -124,24 +129,9 @@ export const depositToken = async ({
         const { signature } = await provider.signAndSendTransaction(transaction);
         
         // wait for confirmation
-        let status = await connection.getSignatureStatus(signature);
-        let retries = 30; // maximum number of retries
-
-        while (retries > 0 && status.value?.confirmationStatus !== 'confirmed') {
-            await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1 second
-            status = await connection.getSignatureStatus(signature);
-            
-            if (status.value?.err) {
-                throw new Error(`Transaction failed: ${JSON.stringify(status.value.err)}`);
-            }
-            
-            retries--;
-            if (retries === 0) {
-                throw new Error('Transaction confirmation timeout');
-            }
-        }
-
-        return { signature, status: status.value?.confirmationStatus };
+        const txStatus = await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
+        console.log("txStatus", txStatus);
+        return txStatus;
     } catch (error) {
         console.error("\nError preparing fund token storage transaction:", error);
         throw error;

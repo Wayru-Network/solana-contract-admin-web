@@ -1,14 +1,16 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { RewardSystem } from "@interfaces/reward-system/reward_system";
+import { RewardSystem } from "../../interfaces/reward-system/reward_system";
 import { clusterApiUrl } from "@solana/web3.js";
-import { Connection } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { ContractDetails } from "../../interfaces/reward-system/program";
+
 
 export const getRewardSystemProgram = async (rewardSystemProgramId: string, publicKey: string | anchor.web3.PublicKey) => {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-    
+
     // Ensure publicKey is a valid PublicKey object
-    const walletPublicKey = typeof publicKey === 'string' 
+    const walletPublicKey = typeof publicKey === 'string'
         ? new anchor.web3.PublicKey(publicKey)
         : publicKey;
 
@@ -34,4 +36,36 @@ export const getRewardSystemProgram = async (rewardSystemProgramId: string, publ
     ) as Program<RewardSystem>;
 
     return program;
+}
+
+
+interface getAdminAccountStateProps {
+    programId: string;
+    publicKey: string | anchor.web3.PublicKey;
+}
+export const getContractDetails = async ({ programId, publicKey }: getAdminAccountStateProps): Promise<ContractDetails | undefined> => {
+    try {
+        const program = await getRewardSystemProgram(
+            programId,
+            publicKey
+        );
+        const [adminAccountPDA] = PublicKey.findProgramAddressSync(
+            [Buffer.from("admin_account")],
+            program.programId
+        );
+        const adminAccountState = await program.account.adminAccount.fetch(adminAccountPDA);
+        return {
+            adminCandidatePubkey: adminAccountState.adminCandidatePubkey.toString(),
+            adminPubkey: adminAccountState.adminPubkey.toString(),
+            adminUpdateRequested: adminAccountState.adminUpdateRequested,
+            mintAuthorities: adminAccountState.mintAuthorities.map(authority => 
+                authority.toString()
+            ),
+            paused: adminAccountState.paused,
+            validMint: adminAccountState.validMint.toString()
+        }
+    } catch (error) {
+        console.log("error", error);
+        return undefined;
+    }
 }

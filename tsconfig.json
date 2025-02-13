@@ -6,13 +6,6 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@interfaces/*": ["src/interfaces/*"],
-      "@services/*": ["src/services/*"],
-      "@components/*": ["src/components/*"],
-      "@utils/*": ["src/utils/*"]
-    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

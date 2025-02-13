@@ -1,15 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState } from 'react';
 
+type NavigationScreen = 'fund-contract' | 'settings' | 'add-authority';
 type NavigationContextType = {
-  currentScreen: string;
-  setCurrentScreen: (screen: string) => void;
+  currentScreen: NavigationScreen;
+  setCurrentScreen: (screen: NavigationScreen) => void;
 };
 
 export const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentScreen, setCurrentScreen] = useState('deposit');
+  const [currentScreen, setCurrentScreen] = useState<NavigationScreen>('fund-contract');
 
   return (
     <NavigationContext.Provider value={{ currentScreen, setCurrentScreen }}>

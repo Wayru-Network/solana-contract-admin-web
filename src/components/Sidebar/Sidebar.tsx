@@ -11,15 +11,15 @@ import Logo from "../../assets/logo-green.png";
 const { Sider } = Layout;
 
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
-  const IconSize = 21;
+  const IconSize = 15;
   const { setCurrentScreen } = useNavigation();
 
   const menuItems = [
     {
-      key: "deposit",
+      key: "fund-contract",
       icon: <DeliveredProcedureOutlined style={{ fontSize: IconSize }} />,
       label: "Fund contract",
-      onClick: () => setCurrentScreen("deposit"),
+      onClick: () => setCurrentScreen("fund-contract"),
     },
     {
       key: "add-authority",
@@ -40,7 +40,8 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       theme="light"
       collapsed={collapsed}
       style={{
-        backgroundColor: appTheme.palette.wayru.inverseSurface,
+        backgroundColor: appTheme.palette.wayru.scrim,
+        borderRight: `1px solid ${appTheme.palette.wayru.outline}`
       }}
     >
       <div className="logo">
@@ -49,9 +50,9 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       <Menu
         theme="light"
         mode="inline"
-        defaultSelectedKeys={['deposit']}
+        defaultSelectedKeys={['fund-contract']}
         style={{
-          backgroundColor: appTheme.palette.wayru.inverseSurface,
+          backgroundColor: appTheme.palette.wayru.scrim,
           fontWeight: "500",
         }}
         items={menuItems}

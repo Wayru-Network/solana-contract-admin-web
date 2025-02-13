@@ -9,6 +9,7 @@ const Button = (props: ButtonProps) => {
         background: appTheme.palette.wayru.secondaryContainer,
         fontSize: "14px",
         color: appTheme.palette.wayru.onSecondaryContainer,
+        borderColor: "transparent",
         ...props.style,
       }}
     >

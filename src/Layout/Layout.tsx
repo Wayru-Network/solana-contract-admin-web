@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Layout } from "antd";
-import { Sidebar } from "../Sidebar/Sidebar";
+import { Sidebar } from "../components/Sidebar/Sidebar";
 import { RenderContent } from "./RenderContent";
-import { HeaderComponent } from "../Header/Header";
+import { HeaderComponent } from "../components/Header/Header";
+import { theme as appTheme } from "../styles/theme";
 const { Content } = Layout;
 
 const LayoutComponent: React.FC = () => {
@@ -22,7 +23,7 @@ const LayoutComponent: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           flex: 1,
-          background: "transparent",
+          background: appTheme.palette.wayru.scrim,
         }}
       >
        <HeaderComponent/>
