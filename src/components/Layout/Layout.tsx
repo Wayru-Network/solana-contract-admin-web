@@ -6,7 +6,7 @@ import { HeaderComponent } from "../Header/Header";
 const { Content } = Layout;
 
 const LayoutComponent: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed] = useState(false);
 
   return (
     <Layout
@@ -25,7 +25,7 @@ const LayoutComponent: React.FC = () => {
           background: "transparent",
         }}
       >
-       <HeaderComponent collapsed={collapsed} setCollapsed={setCollapsed} />
+       <HeaderComponent/>
         <Content
           style={{
             margin: "24px 16px",

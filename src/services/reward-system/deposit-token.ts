@@ -123,7 +123,7 @@ export const depositToken = async ({
 
         const { signature } = await provider.signAndSendTransaction(transaction);
         
-        // Esperar hasta que la transacción sea confirmada o falle
+        // wait for confirmation
         let status = await connection.getSignatureStatus(signature);
         let retries = 30; // maximum number of retries
 

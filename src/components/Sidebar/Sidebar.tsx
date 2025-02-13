@@ -1,10 +1,14 @@
 import { Layout, Menu } from "antd";
 import {
   SettingOutlined,
-  WalletOutlined,
+  DeliveredProcedureOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 import { useNavigation } from "../../hooks/useNavigationContext";
-  const { Sider } = Layout;
+import { theme as appTheme } from "../../styles/theme";
+import Logo from "../../assets/logo-green.png";
+
+const { Sider } = Layout;
 
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
   const IconSize = 21;
@@ -13,9 +17,15 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
   const menuItems = [
     {
       key: "deposit",
-      icon: <WalletOutlined style={{ fontSize: IconSize }} />,
-      label: "Deposit",
+      icon: <DeliveredProcedureOutlined style={{ fontSize: IconSize }} />,
+      label: "Fund contract",
       onClick: () => setCurrentScreen("deposit"),
+    },
+    {
+      key: "add-authority",
+      icon: <UserAddOutlined style={{ fontSize: IconSize }} />,
+      label: "Add Authority",
+      onClick: () => setCurrentScreen("add-authority"),
     },
     {
       key: "settings",
@@ -26,13 +36,26 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
   ];
 
   return (
-    <Sider theme="light" collapsed={collapsed}>
-    <div className="demo-logo-vertical" />
-    <Menu
+    <Sider
       theme="light"
-      mode="inline"
-      items={menuItems}
-    />
-  </Sider>
+      collapsed={collapsed}
+      style={{
+        backgroundColor: appTheme.palette.wayru.inverseSurface,
+      }}
+    >
+      <div className="logo">
+        <img style={{ width: "65%", height: "60%" }} src={Logo} alt="Logo" />
+      </div>
+      <Menu
+        theme="light"
+        mode="inline"
+        defaultSelectedKeys={['deposit']}
+        style={{
+          backgroundColor: appTheme.palette.wayru.inverseSurface,
+          fontWeight: "500",
+        }}
+        items={menuItems}
+      />
+    </Sider>
   );
 };

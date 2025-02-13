@@ -1,16 +1,10 @@
-import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
-import { Button } from "antd";
 import { Header } from "antd/es/layout/layout";
 import { theme as appTheme } from "../../styles/theme";
 import { usePhantom } from "../../hooks/usePhantom";
+import { LoginOutlined, LogoutOutlined } from "@ant-design/icons";
+import Button from "../UI/Button";
 
-export const HeaderComponent = ({
-  collapsed,
-  setCollapsed,
-}: {
-  collapsed: boolean;
-  setCollapsed: (collapsed: boolean) => void;
-}) => {
+export const HeaderComponent = () => {
   const { connect, publicKey, disconnect } = usePhantom();
 
   return (
@@ -23,32 +17,7 @@ export const HeaderComponent = ({
         backgroundColor: "transparent",
       }}
     >
-      { <Button
-        type="text"
-        icon={
-          collapsed ? (
-            // Show "unfold" icon when sidebar is collapsed | Mostrar ícono "desplegar" cuando la barra lateral está colapsada
-            <MenuUnfoldOutlined
-              style={{
-                fontSize: appTheme.iconSize.medium,
-              }}
-            />
-          ) : (
-            // Show "fold" icon when sidebar is expanded | Mostrar ícono "plegar" cuando la barra lateral está expandida
-            <MenuFoldOutlined
-              style={{
-                fontSize: appTheme.iconSize.medium,
-              }}
-            />
-          )
-        }
-        onClick={() => setCollapsed(!collapsed)}
-        style={{
-          fontSize: "16px",
-          width: 64,
-          height: 64,
-        }}
-      />}
+      {<div />}
       <div
         style={{
           marginRight: "24px",
@@ -58,19 +27,38 @@ export const HeaderComponent = ({
         }}
       >
         {publicKey && (
-          <span style={{ color: appTheme.palette.wayru.onSurface }}>
-            Wallet: {publicKey.toString().slice(0, 4)}...
-            {publicKey.toString().slice(-4)}
-          </span>
+          <>
+            <span
+              style={{
+                color: appTheme.palette.wayru.surface,
+                fontWeight: "400",
+              }}
+            >
+              Wallet:
+            </span>
+            <span
+              style={{
+                color: appTheme.palette.wayru.onTertiaryFixed,
+                fontWeight: "400",
+              }}
+            >
+              {publicKey.toString().slice(0, 6)}...
+              {publicKey.toString().slice(-6)}
+            </span>
+          </>
         )}
         <Button
           type="default"
+          iconPosition="end"
+          icon={publicKey ? <LogoutOutlined /> : <LoginOutlined />}
           onClick={() => (publicKey ? disconnect() : connect())}
           style={{
-            background: appTheme.palette.wayru.primary,
+            background: appTheme.palette.wayru.secondaryContainer,
+            fontSize: "14px",
+            color: appTheme.palette.wayru.onSecondaryContainer,
           }}
         >
-          {publicKey ? "Desconectar" : "Conectar Wallet"}
+          {publicKey ? "Disconnect" : "Connect"}
         </Button>
       </div>
     </Header>

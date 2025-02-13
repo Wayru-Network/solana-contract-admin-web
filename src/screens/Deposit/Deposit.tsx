@@ -10,7 +10,6 @@ import {
   message,
 } from "antd";
 import {
-  WalletOutlined,
   DollarOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
@@ -71,7 +70,7 @@ const Deposit: React.FC = () => {
     <div style={{ maxWidth: 600, margin: "0 auto", padding: "24px" }}>
       <Card>
         <Title level={2}>
-          <WalletOutlined /> Deposit
+           Fund contract
         </Title>
 
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
