@@ -1,17 +1,24 @@
-import { Card, Input, Form, Typography, Layout } from "antd";
+import { Card, Input, Form, Typography, Layout, Switch } from "antd";
 import Button from "../../components/UI/Button";
 import { useState, useTransition } from "react";
 import { theme as appTheme } from "../../styles/theme";
 import { useSettings } from "../../hooks/useSettings";
 import { getTokenDetails } from "../../services/solana";
 import { viewWalletOnExplorer } from "../../helpers/wallet";
+import { pauseUnpauseContract } from "../../services/reward-system/pause-unpause-contract";
+import { useGlobalProgress } from "../../hooks/useGlobalProgress";
+import { usePhantom } from "../../hooks/usePhantom";
+import { PublicKey } from "@solana/web3.js";
+import { getRewardSystemProgram } from "../../services/reward-system/program";
 const { Title } = Typography;
 const { Content } = Layout;
 
 const Settings = () => {
   const [isPending, startTransition] = useTransition();
-  const { settings, setSettings } = useSettings();
+  const { settings, setSettings, refreshSettingsState } = useSettings();
   const [isError, setIsError] = useState(false);
+  const { showProgress, setProgressStatus } = useGlobalProgress();
+  const { provider } = usePhantom();
 
   const handleSubmit = (values: { contractId: string; token: string }) => {
     startTransition(async () => {
@@ -19,9 +26,13 @@ const Settings = () => {
       // Simulate a network request
       localStorage.setItem("programId", values.contractId);
       localStorage.setItem("tokenId", values.token);
-      const tokenDetails = await getTokenDetails(values.token, "devnet");
+      const tokenDetails = await getTokenDetails(
+        values.token,
+        "devnet",
+        values.contractId
+      );
       if (!tokenDetails) return setIsError(true);
-      
+
       setSettings({
         contractId: values.contractId,
         tokenId: values.token,
@@ -30,6 +41,40 @@ const Settings = () => {
         tokenDetails: tokenDetails,
       });
     });
+  };
+
+  const handlePauseUnpause = async (pause: boolean) => {
+    try {
+      showProgress(10);
+      const program = await getRewardSystemProgram(
+        settings?.contractId as string,
+        provider.publicKey as PublicKey
+      );
+      // await 1/2 second
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      showProgress(20);
+      const txStatus = await pauseUnpauseContract({
+        program,
+        provider,
+        pause,
+        network: settings?.network ?? "devnet",
+      });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (txStatus?.status === "confirmed") {
+        showProgress(100);
+        setProgressStatus("success");
+      } else {
+        showProgress(100);
+        setProgressStatus("exception");
+      }
+      refreshSettingsState();
+    } catch (error) {
+      console.error(error);
+      showProgress(100);
+      setProgressStatus("exception");
+      refreshSettingsState();
+    }
   };
 
   const AddSettings = () => {
@@ -85,7 +130,11 @@ const Settings = () => {
             </Button>
           </Form.Item>
         </Form>
-        {isError && <Typography.Text style={{ color: appTheme.palette.error.main }}>Error: Token not found</Typography.Text>}
+        {isError && (
+          <Typography.Text style={{ color: appTheme.palette.error.main }}>
+            Error: Token not found
+          </Typography.Text>
+        )}
       </Card>
     );
   };
@@ -106,38 +155,22 @@ const Settings = () => {
           </Title>
         </div>
 
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "1fr 1fr",
-          gap: "24px",
-          width: "100%" 
-        }}>
-          {/* Primera columna */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <Typography.Text
-                style={{ color: appTheme.palette.text.color }}
-              >
-                Contract Address:
-              </Typography.Text>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <Typography.Text
-                  style={{
-                    color: appTheme.palette.wayru.primary,
-                    fontSize: "16px",
-                    cursor: "pointer"
-                  }}
-                  onClick={() => viewWalletOnExplorer(settings?.contractId ?? "", settings?.network as "devnet" | "mainnet")}
-                >
-                  {settings?.contractId}
-                </Typography.Text>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <Typography.Text
-                style={{ color: appTheme.palette.text.color }}
-              >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "24px",
+            width: "100%",
+          }}
+        >
+          {/* Token Details Column */}
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+          >
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+            >
+              <Typography.Text style={{ color: appTheme.palette.text.color }}>
                 Token Address:
               </Typography.Text>
               <div style={{ display: "flex", alignItems: "center" }}>
@@ -145,9 +178,14 @@ const Settings = () => {
                   style={{
                     color: appTheme.palette.wayru.primary,
                     fontSize: "16px",
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
-                  onClick={() => viewWalletOnExplorer(settings?.tokenId ?? "", settings?.network as "devnet" | "mainnet")}
+                  onClick={() =>
+                    viewWalletOnExplorer(
+                      settings?.tokenId ?? "",
+                      settings?.network as "devnet" | "mainnet"
+                    )
+                  }
                 >
                   {settings?.tokenId}
                 </Typography.Text>
@@ -156,45 +194,158 @@ const Settings = () => {
 
             {settings?.tokenDetails && (
               <>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
                   <Typography.Text>Token Decimals:</Typography.Text>
                   <Typography.Text style={{ fontSize: "16px" }}>
                     {settings.tokenDetails.decimals}
                   </Typography.Text>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
                   <Typography.Text>Token Supply:</Typography.Text>
                   <Typography.Text style={{ fontSize: "16px" }}>
                     {settings.tokenDetails.supply}
                   </Typography.Text>
                 </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <Typography.Text>Token Freeze Authority:</Typography.Text>
+                  <Typography.Text style={{ fontSize: "16px" }}>
+                    {settings.tokenDetails.freezeAuthority || "None"}
+                  </Typography.Text>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <Typography.Text>Token Mint Authority:</Typography.Text>
+                  <Typography.Text style={{ fontSize: "16px" }}>
+                    {settings.tokenDetails.mintAuthority || "None"}
+                  </Typography.Text>
+                </div>
               </>
             )}
           </div>
-
-          {/* Segunda columna */}
-          {settings?.tokenDetails && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <Typography.Text>Token Freeze Authority:</Typography.Text>
-                <Typography.Text style={{ fontSize: "16px" }}>
-                  {settings.tokenDetails.freezeAuthority || "None"}
-                </Typography.Text>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <Typography.Text>Token Mint Authority:</Typography.Text>
-                <Typography.Text style={{ fontSize: "16px" }}>
-                  {settings.tokenDetails.mintAuthority || "None"}
+          {/* Contract Details Column */}
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+          >
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+            >
+              <Typography.Text style={{ color: appTheme.palette.text.color }}>
+                Contract Address:
+              </Typography.Text>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Typography.Text
+                  style={{
+                    color: appTheme.palette.wayru.primary,
+                    fontSize: "16px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    viewWalletOnExplorer(
+                      settings?.contractId ?? "",
+                      settings?.network as "devnet" | "mainnet"
+                    )
+                  }
+                >
+                  {settings?.contractId}
                 </Typography.Text>
               </div>
             </div>
-          )}
+
+            {settings?.contractDetails && (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <Typography.Text>Authority contract Address:</Typography.Text>
+                  <Typography.Text
+                    style={{
+                      color: appTheme.palette.wayru.primary,
+                      fontSize: "16px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      viewWalletOnExplorer(
+                        settings?.contractDetails?.adminPubkey ?? "",
+                        settings?.network as "devnet" | "mainnet"
+                      )
+                    }
+                  >
+                    {settings?.contractDetails?.adminPubkey}
+                  </Typography.Text>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <Typography.Text>Contract Token Balance:</Typography.Text>
+                  <Typography.Text style={{ fontSize: "16px" }}>
+                    {settings.contractDetails.contractTokenBalance}
+                  </Typography.Text>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <Typography.Text>Contract Status:</Typography.Text>
+                  <Switch
+                    style={{
+                      width: 74,
+                      borderColor: appTheme.palette.wayru.outline,
+                      borderWidth: 1,
+                    }}
+                    className="custom-switch"
+                    checkedChildren="Active"
+                    unCheckedChildren="Paused"
+                    defaultChecked={!settings.contractDetails.paused}
+                    onChange={(checked) => {
+                      console.log(
+                        "Contract status changed to:",
+                        checked ? "Paused" : "Active"
+                      );
+                      handlePauseUnpause(checked);
+                    }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
-        <Button
-          onClick={() => setSettings(null)}
-          style={{ marginTop: 16 }}
-        >
+        <Button onClick={() => setSettings(null)} style={{ marginTop: 16 }}>
           Change Settings
         </Button>
       </>
@@ -209,7 +360,7 @@ const Settings = () => {
           gap: "24px",
           justifyContent: "center",
           padding: "24px",
-          width: "100%"
+          width: "100%",
         }}
       >
         <div style={{ width: "80%" }}>

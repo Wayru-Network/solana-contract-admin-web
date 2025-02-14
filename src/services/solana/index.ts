@@ -1,13 +1,22 @@
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, getMint } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
 import { CONSTANTS } from 'src/constants';
+import { TokenBalanceInfo } from 'src/interfaces/solana';
 
-export const getTokenDetails = async (tokenAddress: string, network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]) => {
+export const getTokenDetails = async (
+    tokenAddress: string, 
+    network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+    programId: string
+) => {
     const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
     const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
     
     try {
         const tokenPublicKey = new PublicKey(tokenAddress);
+        const programPublicKey = new PublicKey(programId);
+
+        // get balance of the token in the contract
+        const tokenBalance = await getTokenBalance(tokenPublicKey, programPublicKey, network);
         
         // get token info using getMint
         const tokenInfo = await getMint(
@@ -23,7 +32,8 @@ export const getTokenDetails = async (tokenAddress: string, network: keyof  CONS
             supply: Number(tokenInfo.supply).toLocaleString(),
             isInitialized: !tokenInfo.isInitialized,
             freezeAuthority: tokenInfo.freezeAuthority?.toBase58(),
-            mintAuthority: tokenInfo.mintAuthority?.toBase58()
+            mintAuthority: tokenInfo.mintAuthority?.toBase58(),
+            contractTokenBalance: tokenBalance.uiAmount ?? 0
         };
     } catch (error) {
         console.error('error getting token details:', error);
@@ -65,4 +75,55 @@ export const getTxStatus = async (
         signature,
         status: status.value?.confirmationStatus
     };
+};
+
+export const getTokenBalance = async (
+    programId: PublicKey,
+    mint: PublicKey,
+    network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
+): Promise<TokenBalanceInfo> => {
+    try {
+        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+
+        // Get token storage PDA
+        const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(
+            [Buffer.from("token_storage")],
+            programId
+        );
+
+        // Get storage account
+        const storageAccount = await getAssociatedTokenAddress(
+            mint,
+            tokenStorageAuthority,
+            true,
+            TOKEN_PROGRAM_ID
+        );
+
+        try {
+            const balance = await connection.getTokenAccountBalance(storageAccount);
+            return {
+                uiAmount: balance.value.uiAmount,
+                decimals: balance.value.decimals,
+                exists: true,
+                address: storageAccount.toString()
+            };
+        } catch (error) {
+            console.error("Program has no previous balance or account not initialized:", error);
+            return {
+                uiAmount: null,
+                decimals: 0,
+                exists: false,
+                address: storageAccount.toString()
+            };
+        }
+    } catch (error) {
+        console.error("Error getting token balance:", error);
+        return {
+            uiAmount: null,
+            decimals: 0,
+            exists: false,
+            address: ''
+        };
+    }
 };

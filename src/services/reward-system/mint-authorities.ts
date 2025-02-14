@@ -68,11 +68,11 @@ export const AddMintAuthority = async ({
 
             const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
             const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
-            
+
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = provider.publicKey;
- 
+
             console.log("Attempting to sign and send transaction...");
             const { signature } = await provider.signAndSendTransaction(transaction);
             console.log("Transaction sent with signature:", signature);
@@ -114,11 +114,7 @@ export const removeMintAuthority = async ({
 
         // verify that the admin account exists
         try {
-            const adminAccount = await program.account.adminAccount.fetch(adminAccountPDA);
-            console.log("Admin account exists:", {
-                adminPDA: adminAccountPDA.toString(),
-                currentAuthorities: adminAccount.mintAuthorities?.map(a => a.toString())
-            });
+            await program.account.adminAccount.fetch(adminAccountPDA);
         } catch (e) {
             console.error("Error fetching admin account:", e);
             throw new Error("Admin account not found or not initialized");
@@ -145,11 +141,11 @@ export const removeMintAuthority = async ({
 
             const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
             const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
-            
+
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = provider.publicKey;
- 
+
             console.log("Attempting to sign and send transaction...");
             const { signature } = await provider.signAndSendTransaction(transaction);
             console.log("Transaction sent with signature:", signature);

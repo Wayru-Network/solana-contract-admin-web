@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
@@ -41,15 +42,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const programId = localStorage.getItem("programId");
     const tokenId = localStorage.getItem("tokenId");
     if (programId && tokenId) {
-      const tokenDetails = await getTokenDetails(tokenId, "devnet");
+      const tokenDetails = await getTokenDetails(tokenId, settings?.network ?? "devnet", programId);
       const adminAccountState = await getContractDetails({
         programId,
         publicKey: provider.publicKey as PublicKey,
+        network: settings?.network ?? "devnet",
+        tokenId: tokenId,
       });
       setSettings({
         contractId: programId,
         tokenId: tokenId,
-        network: "devnet",
+        network: settings?.network ?? "devnet",
         isSettingsCompleted: true,
         tokenDetails: tokenDetails,
         contractDetails: adminAccountState,

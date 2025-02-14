@@ -4,7 +4,8 @@ import { RewardSystem } from "../../interfaces/reward-system/reward_system";
 import { clusterApiUrl } from "@solana/web3.js";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { ContractDetails } from "../../interfaces/reward-system/program";
-
+import { getTokenBalance } from "../solana";
+import { CONSTANTS } from "../../constants";
 
 export const getRewardSystemProgram = async (rewardSystemProgramId: string, publicKey: string | anchor.web3.PublicKey) => {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -42,9 +43,13 @@ export const getRewardSystemProgram = async (rewardSystemProgramId: string, publ
 interface getAdminAccountStateProps {
     programId: string;
     publicKey: string | anchor.web3.PublicKey;
+    network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"];
+    tokenId: string;
 }
-export const getContractDetails = async ({ programId, publicKey }: getAdminAccountStateProps): Promise<ContractDetails | undefined> => {
+export const getContractDetails = async ({ programId, publicKey, network, tokenId }: getAdminAccountStateProps): Promise<ContractDetails | undefined> => {
     try {
+        const tokenBalance = await getTokenBalance(publicKey as PublicKey, new PublicKey(tokenId), network);
+
         const program = await getRewardSystemProgram(
             programId,
             publicKey
@@ -62,7 +67,8 @@ export const getContractDetails = async ({ programId, publicKey }: getAdminAccou
                 authority.toString()
             ),
             paused: adminAccountState.paused,
-            validMint: adminAccountState.validMint.toString()
+            validMint: adminAccountState.validMint.toString(),
+            contractTokenBalance: tokenBalance.uiAmount ?? 0
         }
     } catch (error) {
         console.log("error", error);

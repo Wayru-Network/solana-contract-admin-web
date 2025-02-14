@@ -6,3 +6,11 @@
     padding: 10px;
     margin-bottom: 10px;
 }
+
+.custom-switch {
+    width: 74px !important;
+  }
+  
+  .custom-switch .ant-switch-handle::before {
+    border: 1px solid #899294;
+  }

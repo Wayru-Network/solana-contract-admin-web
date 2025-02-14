@@ -6,3 +6,10 @@ export interface TokenDetails {
     freezeAuthority: string | undefined;
     mintAuthority: string | undefined;
 }
+
+export interface TokenBalanceInfo {
+    uiAmount: number | null;
+    decimals: number;
+    exists: boolean;
+    address: string;
+}
