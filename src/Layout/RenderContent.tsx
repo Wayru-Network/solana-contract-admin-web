@@ -1,7 +1,7 @@
 import Settings from "../screens/Settings/Settings";
 import { useNavigation } from "../hooks/useNavigationContext";
 import FundContract from "../screens/FundContract/FundContract";
-import AddAuthority from "../screens/AddAuthority/AddAuthority";
+import AuthorityConfigurations from "../screens/AuthorityConfigs/AuthorityConfigs";
 
 export const RenderContent = () => {
   const { currentScreen } = useNavigation();
@@ -11,8 +11,8 @@ export const RenderContent = () => {
       return <FundContract />;
     case 'settings':
       return <Settings />;
-    case 'add-authority':
-      return <AddAuthority />;
+    case 'authority-configs':
+      return <AuthorityConfigurations />;
     default:
       return <Settings />;
   }

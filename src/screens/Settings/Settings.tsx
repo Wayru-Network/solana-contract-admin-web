@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { theme as appTheme } from "../../styles/theme";
 import { useSettings } from "../../hooks/useSettings";
 import { getTokenDetails } from "../../services/solana";
+import { viewWalletOnExplorer } from "../../helpers/wallet";
 const { Title } = Typography;
 const { Content } = Layout;
 
@@ -114,29 +115,55 @@ const Settings = () => {
           {/* Primera columna */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <Typography.Text>Contract Address:</Typography.Text>
-              <Typography.Text style={{ fontSize: "16px" }}>
-                {settings?.contractId}
+              <Typography.Text
+                style={{ color: appTheme.palette.text.color }}
+              >
+                Contract Address:
               </Typography.Text>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Typography.Text
+                  style={{
+                    color: appTheme.palette.wayru.primary,
+                    fontSize: "16px",
+                    cursor: "pointer"
+                  }}
+                  onClick={() => viewWalletOnExplorer(settings?.contractId ?? "", settings?.network as "devnet" | "mainnet")}
+                >
+                  {settings?.contractId}
+                </Typography.Text>
+              </div>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <Typography.Text>Token Address:</Typography.Text>
-              <Typography.Text style={{ fontSize: "16px" }}>
-                {settings?.tokenId}
+              <Typography.Text
+                style={{ color: appTheme.palette.text.color }}
+              >
+                Token Address:
               </Typography.Text>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Typography.Text
+                  style={{
+                    color: appTheme.palette.wayru.primary,
+                    fontSize: "16px",
+                    cursor: "pointer"
+                  }}
+                  onClick={() => viewWalletOnExplorer(settings?.tokenId ?? "", settings?.network as "devnet" | "mainnet")}
+                >
+                  {settings?.tokenId}
+                </Typography.Text>
+              </div>
             </div>
 
             {settings?.tokenDetails && (
               <>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <Typography.Text>Decimals:</Typography.Text>
+                  <Typography.Text>Token Decimals:</Typography.Text>
                   <Typography.Text style={{ fontSize: "16px" }}>
                     {settings.tokenDetails.decimals}
                   </Typography.Text>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <Typography.Text>Supply:</Typography.Text>
+                  <Typography.Text>Token Supply:</Typography.Text>
                   <Typography.Text style={{ fontSize: "16px" }}>
                     {settings.tokenDetails.supply}
                   </Typography.Text>
@@ -149,13 +176,13 @@ const Settings = () => {
           {settings?.tokenDetails && (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <Typography.Text>Freeze Authority:</Typography.Text>
+                <Typography.Text>Token Freeze Authority:</Typography.Text>
                 <Typography.Text style={{ fontSize: "16px" }}>
                   {settings.tokenDetails.freezeAuthority || "None"}
                 </Typography.Text>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <Typography.Text>Mint Authority:</Typography.Text>
+                <Typography.Text>Token Mint Authority:</Typography.Text>
                 <Typography.Text style={{ fontSize: "16px" }}>
                   {settings.tokenDetails.mintAuthority || "None"}
                 </Typography.Text>

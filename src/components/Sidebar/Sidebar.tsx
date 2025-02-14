@@ -22,10 +22,10 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       onClick: () => setCurrentScreen("fund-contract"),
     },
     {
-      key: "add-authority",
+      key: "authority-configs",
       icon: <UserAddOutlined style={{ fontSize: IconSize }} />,
-      label: "Add Authority",
-      onClick: () => setCurrentScreen("add-authority"),
+      label: "Authorities",
+      onClick: () => setCurrentScreen("authority-configs"),
     },
     {
       key: "settings",

@@ -6,21 +6,12 @@ import { Select, Typography } from "antd";
 import { useSettings } from "../../hooks/useSettings";
 import Button from "../UI/Button";
 import { Settings as SettingInterface } from "../../context/SettingsContext";
-import { CONSTANTS } from "../../constants";
-
+import { formatWalletAddress, viewWalletOnExplorer } from "../../helpers/wallet";
 
 export const HeaderComponent = () => {
   const { connect, publicKey, disconnect } = usePhantom();
   const { settings, setSettings } = useSettings();
 
-  const onclickWallet = () => {
-    if (publicKey && settings?.network) {
-      const url = CONSTANTS.NETWORK.EXPLORER_ACCOUNT_URL[settings?.network];
-      // replace the replaceme with the public key
-      const urlWithPublicKey = url.replace("replaceme", publicKey.toString());
-      window.open(urlWithPublicKey, "_blank");
-    }
-  }
 
   return (
     <Header
@@ -45,14 +36,13 @@ export const HeaderComponent = () => {
           <>
             <Typography.Text>Wallet:</Typography.Text>
             <Typography.Text
-              onClick={onclickWallet}
+              onClick={() => viewWalletOnExplorer(publicKey.toString(), settings?.network as "devnet" | "mainnet")}
               style={{
                 color: appTheme.palette.wayru.primary,
                 cursor: "pointer",
               }}
             >
-              {publicKey.toString().slice(0, 6)}...
-              {publicKey.toString().slice(-6)}
+                {formatWalletAddress(publicKey.toString())}
             </Typography.Text>
           </>
         )}

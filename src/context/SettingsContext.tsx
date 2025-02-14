@@ -1,5 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from "react";
 import { CONSTANTS } from "../constants";
 import { getTokenDetails } from "../services/solana";
 import { TokenDetails } from "../interfaces/solana";
@@ -20,6 +26,7 @@ export type Settings = {
 interface SettingsContextType {
   settings: Settings;
   setSettings: (settings: Settings) => void;
+  refreshSettingsState: () => Promise<void>;
 }
 
 export const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -30,36 +37,44 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(null);
   const { provider } = usePhantom();
 
+  const getSettings = useCallback(async () => {
+    const programId = localStorage.getItem("programId");
+    const tokenId = localStorage.getItem("tokenId");
+    if (programId && tokenId) {
+      const tokenDetails = await getTokenDetails(tokenId, "devnet");
+      const adminAccountState = await getContractDetails({
+        programId,
+        publicKey: provider.publicKey as PublicKey,
+      });
+      setSettings({
+        contractId: programId,
+        tokenId: tokenId,
+        network: "devnet",
+        isSettingsCompleted: true,
+        tokenDetails: tokenDetails,
+        contractDetails: adminAccountState,
+      });
+    } else {
+      setSettings({
+        isSettingsCompleted: false,
+        contractId: "",
+        tokenId: "",
+        network: "devnet",
+      });
+    }
+  }, [provider.publicKey]);
 
   // use effect to get the programId from the local storage
   useEffect(() => {
-    (async () => {
-      const programId = localStorage.getItem("programId");
-      const tokenId = localStorage.getItem("tokenId");
-      if (programId && tokenId) {
-        const tokenDetails = await getTokenDetails(tokenId, "devnet");
-        const adminAccountState = await getContractDetails({ programId, publicKey: provider.publicKey as PublicKey });
-        setSettings({
-          contractId: programId,
-          tokenId: tokenId,
-          network: "devnet",
-          isSettingsCompleted: true,
-          tokenDetails: tokenDetails,
-          contractDetails: adminAccountState,
-        });
-      } else {
-        setSettings({
-          isSettingsCompleted: false,
-          contractId: "",
-          tokenId: "",
-          network: "devnet",
-        });
-      }
-    })();
-  }, [setSettings, provider.publicKey]);
+    getSettings();
+  }, [getSettings]);
+
+  const refreshSettingsState = useCallback(async () => {
+    await getSettings();
+  }, [getSettings]);
 
   return (
-    <SettingsContext.Provider value={{ settings, setSettings }}>
+    <SettingsContext.Provider value={{ settings, setSettings, refreshSettingsState }}>
       {children}
     </SettingsContext.Provider>
   );

@@ -20,6 +20,7 @@ import { theme as appTheme } from "../../styles/theme";
 import { useSettings } from "../../hooks/useSettings";
 import { useTransition } from "react";
 import Button from "../../components/UI/Button";
+import { useGlobalProgress } from '../../hooks/useGlobalProgress';
 const { Title } = Typography;
 
 interface FundContractFormValues {
@@ -31,15 +32,18 @@ const FundContract: React.FC = () => {
   const { provider } = usePhantom();
   const [isPending, startTransition] = useTransition();
   const { settings } = useSettings();
+  const { showProgress, setProgressStatus } = useGlobalProgress();
 
   const handleSubmit = async (values: FundContractFormValues) => {
     startTransition(async () => {
       try {
+        form.resetFields();
+        showProgress(10);
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
           provider.publicKey as PublicKey
         );
-        
+        showProgress(20);
         const { status, signature } = await FundContractToken({
           program,
           userPublicKey: provider.publicKey as PublicKey,
@@ -48,11 +52,13 @@ const FundContract: React.FC = () => {
           provider: provider,
           network: settings?.network
         });
-
+        showProgress(50);
         if (status === "confirmed") {
-          message.success('FundContract successful');
+          showProgress(100);
+          setProgressStatus("success");
         } else {
-          message.error('FundContract failed');
+          showProgress(100);
+          setProgressStatus("exception");
         }
 
         console.log("status", status);
@@ -60,6 +66,8 @@ const FundContract: React.FC = () => {
       } catch (error) {
         message.error('FundContract failed');
         console.log("handleSubmit error", error);
+        showProgress(100);
+        setProgressStatus("exception");
       }
     });
   };

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState } from 'react';
 
-type NavigationScreen = 'fund-contract' | 'settings' | 'add-authority';
+type NavigationScreen = 'fund-contract' | 'settings' | 'authority-configs';
 type NavigationContextType = {
   currentScreen: NavigationScreen;
   setCurrentScreen: (screen: NavigationScreen) => void;
