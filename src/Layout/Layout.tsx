@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Layout } from "antd";
 import { Sidebar } from "../components/Sidebar/Sidebar";
-import { RenderContent } from "./RenderContent";
+import { Outlet } from "react-router-dom";
 import { HeaderComponent } from "../components/Header/Header";
 import { theme as appTheme } from "../styles/theme";
 const { Content } = Layout;
@@ -26,7 +26,7 @@ const LayoutComponent: React.FC = () => {
           background: appTheme.palette.wayru.scrim,
         }}
       >
-       <HeaderComponent/>
+        <HeaderComponent/>
         <Content
           style={{
             margin: "24px 16px",
@@ -36,7 +36,7 @@ const LayoutComponent: React.FC = () => {
             overflow: "auto",
           }}
         >
-          <RenderContent />
+          <Outlet />
         </Content>
       </Layout>
     </Layout>

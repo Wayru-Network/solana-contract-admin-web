@@ -1,16 +1,12 @@
 import { PhantomProvider } from "./context/PhantomContext";
-import { NavigationProvider } from "./context/NavigationContext";
-import LayoutComponent from "./Layout/Layout";
 import { ConfigProvider } from "antd";
 import { theme as appTheme } from "./styles/theme";
 import "antd/dist/reset.css";
 import "./styles/global.css";
 import { SettingsProvider } from "./context/SettingsContext";
-import { GlobalProgressProvider } from './contexts/GlobalProgressContext';
-
-function AppContent() {
-  return <LayoutComponent />;
-}
+import { GlobalProgressProvider } from './context/GlobalProgressContext';
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 
 function App() {
   return (
@@ -75,9 +71,7 @@ function App() {
       >
         <PhantomProvider>
           <SettingsProvider>
-            <NavigationProvider>
-              <AppContent />
-            </NavigationProvider>
+            <RouterProvider router={router} />
           </SettingsProvider>
         </PhantomProvider>
       </ConfigProvider>

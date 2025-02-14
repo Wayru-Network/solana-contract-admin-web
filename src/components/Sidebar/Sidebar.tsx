@@ -4,7 +4,7 @@ import {
   DeliveredProcedureOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
-import { useNavigation } from "../../hooks/useNavigationContext";
+import { Link, useLocation } from "react-router-dom";
 import { theme as appTheme } from "../../styles/theme";
 import Logo from "../../assets/logo-green.png";
 
@@ -12,26 +12,24 @@ const { Sider } = Layout;
 
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
   const IconSize = 15;
-  const { setCurrentScreen } = useNavigation();
+  const location = useLocation();
+  const currentPath = location.pathname.substring(1) || 'settings'; // Remove leading slash
 
   const menuItems = [
     {
       key: "fund-contract",
       icon: <DeliveredProcedureOutlined style={{ fontSize: IconSize }} />,
-      label: "Fund contract",
-      onClick: () => setCurrentScreen("fund-contract"),
+      label: <Link to="/fund-contract">Fund Contract</Link>,
     },
     {
       key: "authority-configs",
       icon: <UserAddOutlined style={{ fontSize: IconSize }} />,
-      label: "Authorities",
-      onClick: () => setCurrentScreen("authority-configs"),
+      label: <Link to="/authority-configs">Authority Configurations</Link>,
     },
     {
       key: "settings",
       icon: <SettingOutlined style={{ fontSize: IconSize }} />,
-      label: "Settings",
-      onClick: () => setCurrentScreen("settings"),
+      label: <Link to="/settings">Settings</Link>,
     },
   ];
 
@@ -50,7 +48,7 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       <Menu
         theme="light"
         mode="inline"
-        defaultSelectedKeys={['fund-contract']}
+        selectedKeys={[currentPath]}
         style={{
           backgroundColor: appTheme.palette.wayru.scrim,
           fontWeight: "500",
