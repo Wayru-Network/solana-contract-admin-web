@@ -1,3 +1,4 @@
+import { PublicKey } from "@solana/web3.js";
 
 export interface CONSTANTS {
     NETWORK: {
@@ -6,6 +7,7 @@ export interface CONSTANTS {
             mainnet: string;
         };
     };
+    BPF_UPGRADE_LOADER_ID: PublicKey;
 }
 
 
@@ -16,5 +18,5 @@ export const CONSTANTS: CONSTANTS = {
             mainnet: "https://solscan.io/account/replaceme",
         },
     },
-    
+    BPF_UPGRADE_LOADER_ID: new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111"),
 }

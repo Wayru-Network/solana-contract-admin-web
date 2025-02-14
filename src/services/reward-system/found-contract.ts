@@ -29,7 +29,7 @@ interface FundTokenStorageProps {
     network?: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 }
 
-export const FundContractToken = async ({
+export const fundContractToken = async ({
     program,
     userPublicKey,
     mint,

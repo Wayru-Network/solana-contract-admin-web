@@ -5,7 +5,7 @@ import { getRewardSystemProgram } from "../../services/reward-system/program";
 import { usePhantom } from "../../hooks/usePhantom";
 import { PublicKey } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
-import { FundContractToken } from "../../services/reward-system/found-contract";
+import { fundContractToken } from "../../services/reward-system/found-contract";
 import { convertToTokenAmount } from "../../helpers/reward-system/reward-system";
 import { theme as appTheme } from "../../styles/theme";
 import { useSettings } from "../../hooks/useSettings";
@@ -36,7 +36,7 @@ const FundContract: React.FC = () => {
         // await 1/2 second 
         await new Promise((resolve) => setTimeout(resolve, 500));
         showProgress(20);
-        const { status, signature } = await FundContractToken({
+        const { status, signature } = await fundContractToken({
           program,
           userPublicKey: provider.publicKey as PublicKey,
           mint: new PublicKey(settings?.tokenId as string),

@@ -3,6 +3,7 @@ import {
   SettingOutlined,
   DeliveredProcedureOutlined,
   UserAddOutlined,
+  RocketOutlined
 } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { theme as appTheme } from "../../styles/theme";
@@ -13,7 +14,7 @@ const { Sider } = Layout;
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
   const IconSize = 15;
   const location = useLocation();
-  const currentPath = location.pathname.substring(1) || 'settings'; // Remove leading slash
+  const currentPath = location.pathname.substring(1) || "settings"; // Remove leading slash
 
   const menuItems = [
     {
@@ -25,6 +26,11 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       key: "authority-configs",
       icon: <UserAddOutlined style={{ fontSize: IconSize }} />,
       label: <Link to="/authority-configs">Authority Configurations</Link>,
+    },
+    {
+      key: "initialize-contract",
+      icon: <RocketOutlined style={{ fontSize: IconSize }} />,
+      label: <Link to="/initialize-contract">Initialize Contract</Link>,
     },
     {
       key: "settings",
@@ -39,7 +45,7 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       collapsed={collapsed}
       style={{
         backgroundColor: appTheme.palette.wayru.scrim,
-        borderRight: `1px solid ${appTheme.palette.wayru.outline}`
+        borderRight: `1px solid ${appTheme.palette.wayru.outline}`,
       }}
     >
       <div className="logo">

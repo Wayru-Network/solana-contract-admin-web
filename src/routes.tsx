@@ -3,6 +3,7 @@ import LayoutComponent from "./Layout/Layout";
 import Settings from "./screens/Settings/Settings";
 import FundContract from "./screens/FundContract/FundContract";
 import AuthorityConfigurations from "./screens/AuthorityConfigs/AuthorityConfigs";
+import InitializeContract from "./screens/InitializeContract/InitializeContract";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ export const router = createBrowserRouter([
       {
         path: "authority-configs",
         element: <AuthorityConfigurations />,
+      },
+      {
+        path: "initialize-contract",
+        element: <InitializeContract />,
       },
     ],
   },
