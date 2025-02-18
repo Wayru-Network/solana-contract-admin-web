@@ -12,6 +12,16 @@ export const HeaderComponent = () => {
   const { connect, publicKey, disconnect } = usePhantom();
   const { settings, setSettings } = useSettings();
 
+  const changeNetwork = async (value: "devnet" | "mainnet") => {
+    setSettings({
+      ...settings,
+      network: value as "devnet" | "mainnet",
+    } as SettingInterface);
+    localStorage.setItem("network", value);
+    // wait for 1 second before reloading
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    window.location.reload();
+  };
 
   return (
     <Header
@@ -64,10 +74,7 @@ export const HeaderComponent = () => {
           optionFilterProp="label"
           showSearch
           onChange={(value) => {
-            setSettings({
-              ...settings,
-              network: value as "devnet" | "mainnet",
-            } as SettingInterface);
+            changeNetwork(value as "devnet" | "mainnet");
           }}
           options={[
             { value: "devnet", label: "Devnet" },

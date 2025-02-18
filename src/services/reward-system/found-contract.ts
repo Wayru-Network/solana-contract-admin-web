@@ -70,6 +70,7 @@ export const fundContractToken = async ({
         const preInstructions: TransactionInstruction[] = [];
 
         // If the storage account does not exist, create the instruction to create it
+        console.log("storageAccountInfo", storageAccountInfo);
         if (!storageAccountInfo) {
             preInstructions.push(
                 createAssociatedTokenAccountInstruction(
@@ -128,9 +129,11 @@ export const fundContractToken = async ({
 
         const { signature } = await provider.signAndSendTransaction(transaction);
         
-        // wait for confirmation
+        // Wait for finalized confirmation
+        console.log("Waiting for transaction finalization...");
+
         const txStatus = await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
-        console.log("txStatus", txStatus);
+        
         return txStatus;
     } catch (error) {
         console.error("\nError preparing fund token storage transaction:", error);

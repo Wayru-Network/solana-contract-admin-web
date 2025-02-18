@@ -9,6 +9,5 @@ interface AccountState {
 
 export type AdminAccountState = AccountState | null;
 
-export interface ContractDetails extends AccountState {
-    contractTokenBalance?: number;
+export type ContractDetails = AccountState & {
 }

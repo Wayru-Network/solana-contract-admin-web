@@ -8,15 +8,16 @@ export const getTokenDetails = async (
     network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
     programId: string
 ) => {
+    console.log("network", network);
     const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
     const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
-    
+
     try {
         const tokenPublicKey = new PublicKey(tokenAddress);
         const programPublicKey = new PublicKey(programId);
 
         // get balance of the token in the contract
-        const tokenBalance = await getTokenBalance(tokenPublicKey, programPublicKey, network);
+        const tokenBalance = await getTokenBalance(programPublicKey, tokenPublicKey, network);
         
         // get token info using getMint
         const tokenInfo = await getMint(
@@ -33,7 +34,7 @@ export const getTokenDetails = async (
             isInitialized: !tokenInfo.isInitialized,
             freezeAuthority: tokenInfo.freezeAuthority?.toBase58(),
             mintAuthority: tokenInfo.mintAuthority?.toBase58(),
-            contractTokenBalance: tokenBalance.uiAmount ?? 0
+            contractTokenBalance: Number(tokenBalance.uiAmount).toLocaleString() ?? 0
         };
     } catch (error) {
         console.error('error getting token details:', error);
@@ -86,44 +87,42 @@ export const getTokenBalance = async (
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
         const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
 
-        // Get token storage PDA
+        // Get token storage PDA - Ensure seeds are exactly the same
         const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(
             [Buffer.from("token_storage")],
-            programId
+            new PublicKey(programId)
         );
 
         // Get storage account
         const storageAccount = await getAssociatedTokenAddress(
             mint,
             tokenStorageAuthority,
-            true,
-            TOKEN_PROGRAM_ID
+            true
         );
-
-        try {
-            const balance = await connection.getTokenAccountBalance(storageAccount);
+ 
+        // check if the storage account exists
+        const accountInfo = await connection.getAccountInfo(storageAccount);
+        
+        if (!accountInfo) {
             return {
-                uiAmount: balance.value.uiAmount,
-                decimals: balance.value.decimals,
-                exists: true,
-                address: storageAccount.toString()
-            };
-        } catch (error) {
-            console.error("Program has no previous balance or account not initialized:", error);
-            return {
-                uiAmount: null,
+                uiAmount: 0,
                 decimals: 0,
                 exists: false,
                 address: storageAccount.toString()
             };
         }
-    } catch (error) {
-        console.error("Error getting token balance:", error);
+
+        const balance = await connection.getTokenAccountBalance(storageAccount);
+        console.log("Balance found:", balance.value.uiAmount);
+        
         return {
-            uiAmount: null,
-            decimals: 0,
-            exists: false,
-            address: ''
+            uiAmount: balance.value.uiAmount,
+            decimals: balance.value.decimals,
+            exists: true,
+            address: storageAccount.toString()
         };
+    } catch (error) {
+        console.error("Error in getTokenBalance:", error);
+        throw error;
     }
 };

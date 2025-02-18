@@ -5,6 +5,7 @@ export interface TokenDetails {
     isInitialized: boolean;
     freezeAuthority: string | undefined;
     mintAuthority: string | undefined;
+    contractTokenBalance?: string;
 }
 
 export interface TokenBalanceInfo {

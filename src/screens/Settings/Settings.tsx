@@ -310,8 +310,8 @@ const Settings = () => {
                 >
                   <Typography.Text>Contract Token Balance:</Typography.Text>
                   <Typography.Text style={{ fontSize: "16px" }}>
-                    {settings.contractDetails.contractTokenBalance}
-                  </Typography.Text>
+                    {settings.tokenDetails?.contractTokenBalance}
+                  </Typography.Text>|
                 </div>
                 <div
                   style={{
