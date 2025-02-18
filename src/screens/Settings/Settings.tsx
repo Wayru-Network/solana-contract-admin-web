@@ -1,6 +1,15 @@
-import { Card, Input, Form, Typography, Layout, Switch } from "antd";
+import {
+  Card,
+  Input,
+  Form,
+  Typography,
+  Layout,
+  Switch,
+  Spin,
+  message,
+} from "antd";
 import Button from "../../components/UI/Button";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { theme as appTheme } from "../../styles/theme";
 import { useSettings } from "../../hooks/useSettings";
 import { getTokenDetails } from "../../services/solana";
@@ -15,10 +24,13 @@ const { Content } = Layout;
 
 const Settings = () => {
   const [isPending, startTransition] = useTransition();
-  const { settings, setSettings, refreshSettingsState } = useSettings();
+  const { settings, setSettings, refreshSettingsState, isGettingSettings } =
+    useSettings();
   const [isError, setIsError] = useState(false);
   const { showProgress, setProgressStatus } = useGlobalProgress();
   const { provider } = usePhantom();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [isSwitchOn, setIsSwitchOn] = useState(!settings?.contractDetails?.paused);
 
   const handleSubmit = (values: { contractId: string; token: string }) => {
     startTransition(async () => {
@@ -45,6 +57,19 @@ const Settings = () => {
 
   const handlePauseUnpause = async (pause: boolean) => {
     try {
+      if (!provider.publicKey?.toString()) {
+        messageApi.error("Please connect your wallet");
+        return;
+      }
+      else if (
+        settings?.contractDetails?.programDetails?.upgradeAuthority !==
+        provider.publicKey?.toString()
+      ) {
+        messageApi.error("Wallet connected is not the same as the upgrade authority");
+        return;
+      }
+      
+      setIsSwitchOn(pause);
       showProgress(10);
       const program = await getRewardSystemProgram(
         settings?.contractId as string,
@@ -62,6 +87,7 @@ const Settings = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (txStatus?.status === "confirmed") {
+        await refreshSettingsState();
         showProgress(100);
         setProgressStatus("success");
       } else {
@@ -76,6 +102,29 @@ const Settings = () => {
       refreshSettingsState();
     }
   };
+
+  useEffect(() => {
+    if (settings?.contractDetails?.paused) {
+      setIsSwitchOn(false);
+    } else {
+      setIsSwitchOn(true);
+    }
+  }, [settings?.contractDetails?.paused]);
+
+  if (isGettingSettings) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "70vh",
+        }}
+      >
+        <Spin size="large" tip="Loading settings..." />
+      </div>
+    );
+  }
 
   const AddSettings = () => {
     return (
@@ -140,6 +189,7 @@ const Settings = () => {
   };
 
   const Details = () => {
+
     return (
       <>
         <div
@@ -148,6 +198,7 @@ const Settings = () => {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: 24,
+            marginTop: -10,
           }}
         >
           <Title style={{ color: appTheme.palette.text.color }} level={4}>
@@ -300,7 +351,35 @@ const Settings = () => {
                     {settings?.contractDetails?.adminPubkey}
                   </Typography.Text>
                 </div>
-
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <Typography.Text>
+                    Upgrade Authority Contract address:
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      color: appTheme.palette.wayru.primary,
+                      fontSize: "16px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      viewWalletOnExplorer(
+                        settings?.contractDetails?.adminPubkey ?? "",
+                        settings?.network as "devnet" | "mainnet"
+                      )
+                    }
+                  >
+                    {
+                      settings?.contractDetails?.programDetails
+                        ?.upgradeAuthority
+                    }
+                  </Typography.Text>
+                </div>
                 <div
                   style={{
                     display: "flex",
@@ -311,7 +390,8 @@ const Settings = () => {
                   <Typography.Text>Contract Token Balance:</Typography.Text>
                   <Typography.Text style={{ fontSize: "16px" }}>
                     {settings.tokenDetails?.contractTokenBalance}
-                  </Typography.Text>|
+                  </Typography.Text>
+                  |
                 </div>
                 <div
                   style={{
@@ -330,13 +410,9 @@ const Settings = () => {
                     className="custom-switch"
                     checkedChildren="Active"
                     unCheckedChildren="Paused"
-                    defaultChecked={!settings.contractDetails.paused}
+                    checked={isSwitchOn}
                     onChange={(checked) => {
-                      console.log(
-                        "Contract status changed to:",
-                        checked ? "Paused" : "Active"
-                      );
-                      handlePauseUnpause(checked);
+                      handlePauseUnpause(!checked);
                     }}
                   />
                 </div>
@@ -354,6 +430,7 @@ const Settings = () => {
 
   return (
     <Content style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      {contextHolder}
       <div
         style={{
           display: "flex",

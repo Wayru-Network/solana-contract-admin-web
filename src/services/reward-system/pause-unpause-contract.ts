@@ -22,18 +22,18 @@ export const pauseUnpauseContract = async ({ program, provider, pause, network }
             program.programId
         );
         let transaction = new Transaction();
+        const accounts = {
+            user: provider.publicKey,
+            adminAccount: adminAccountPDA,
+        } as const
 
         if (pause) {
             transaction = await program.methods.pauseProgram()
-                .accounts({
-                    user: adminAccountPDA,
-                })
+                .accounts(accounts)
                 .transaction();
         } else {
             transaction = await program.methods.unpauseProgram()
-                .accounts({
-                    user: adminAccountPDA,
-                })
+                .accounts(accounts)
                 .transaction();
         }
 
@@ -45,7 +45,6 @@ export const pauseUnpauseContract = async ({ program, provider, pause, network }
 
         // wait for confirmation
         const txStatus = await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
-        console.log("txStatus", txStatus);
         return txStatus;
 
     } catch (error) {

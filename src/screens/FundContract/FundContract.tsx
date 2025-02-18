@@ -22,7 +22,7 @@ const FundContract: React.FC = () => {
   const [form] = Form.useForm();
   const { provider } = usePhantom();
   const [isPending, startTransition] = useTransition();
-  const { settings } = useSettings();
+  const { settings, refreshSettingsState } = useSettings();
   const { showProgress, setProgressStatus } = useGlobalProgress();
 
   const handleSubmit = async (values: FundContractFormValues) => {
@@ -48,6 +48,7 @@ const FundContract: React.FC = () => {
         showProgress(50);
         await new Promise((resolve) => setTimeout(resolve, 500));
         if (status === "confirmed") {
+          await refreshSettingsState()
           showProgress(100);
           setProgressStatus("success");
           form.resetFields();

@@ -8,7 +8,6 @@ export const getTokenDetails = async (
     network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
     programId: string
 ) => {
-    console.log("network", network);
     const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
     const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
 
@@ -113,7 +112,6 @@ export const getTokenBalance = async (
         }
 
         const balance = await connection.getTokenAccountBalance(storageAccount);
-        console.log("Balance found:", balance.value.uiAmount);
         
         return {
             uiAmount: balance.value.uiAmount,

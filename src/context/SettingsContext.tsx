@@ -5,6 +5,7 @@ import {
   ReactNode,
   useEffect,
   useCallback,
+  useTransition,
 } from "react";
 import { CONSTANTS } from "../constants";
 import { getTokenDetails } from "../services/solana";
@@ -27,6 +28,7 @@ interface SettingsContextType {
   settings: Settings;
   setSettings: (settings: Settings) => void;
   refreshSettingsState: () => Promise<void>;
+  isGettingSettings: boolean;
 }
 
 export const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -35,6 +37,7 @@ export const SettingsContext = createContext<SettingsContextType | undefined>(
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(null);
+  const [isGettingSettings, startTransition] = useTransition();
   const { provider } = usePhantom();
 
   const getSettings = useCallback(async () => {
@@ -42,20 +45,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const tokenId = localStorage.getItem("tokenId");
     const network = localStorage.getItem("network");
     if (programId && tokenId && network) {
-      const tokenDetails = await getTokenDetails(tokenId, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"], programId);
-      const adminAccountState = await getContractDetails({
-        programId,
-        publicKey: provider.publicKey as PublicKey,
-        network: network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
-        tokenId: tokenId,
-      });
-      setSettings({
-        contractId: programId,
-        tokenId: tokenId,
-        network: network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
-        isSettingsCompleted: true,
-        tokenDetails: tokenDetails,
-        contractDetails: adminAccountState,
+      startTransition(async () => {
+        const tokenDetails = await getTokenDetails(tokenId, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"], programId);
+        const contractDetails = await getContractDetails({
+          programId,
+          publicKey: provider.publicKey as PublicKey,
+          network: network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          tokenId: tokenId,
+        });
+        setSettings({
+          contractId: programId,
+          tokenId: tokenId,
+          network: network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          isSettingsCompleted: true,
+          tokenDetails: tokenDetails,
+          contractDetails: contractDetails,
+        });
       });
     } else {
       setSettings({
@@ -77,7 +82,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [getSettings]);
 
   return (
-    <SettingsContext.Provider value={{ settings, setSettings, refreshSettingsState }}>
+    <SettingsContext.Provider value={{ settings, setSettings, refreshSettingsState, isGettingSettings }}>
       {children}
     </SettingsContext.Provider>
   );

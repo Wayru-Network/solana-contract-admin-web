@@ -13,18 +13,15 @@ interface GlobalProgressContextType {
 export const GlobalProgressContext = createContext<GlobalProgressContextType | undefined>(undefined);
 
 export const GlobalProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isVisible, setIsVisible] = useState(false);
   const [percent, setPercent] = useState(0);
   const [status, setStatus] = useState<ProgressProps['status']>('normal');
 
   const showProgress = (initialPercent: number = 0) => {
     setPercent(initialPercent);
     setStatus('normal');
-    setIsVisible(true);
   };
 
   const hideProgress = () => {
-    setIsVisible(false);
     setPercent(0);
   };
 
@@ -45,7 +42,7 @@ export const GlobalProgressProvider: React.FC<{ children: React.ReactNode }> = (
         setProgressStatus,
       }}
     >
-      <GlobalProgress isVisible={isVisible} percent={percent} status={status} />
+      <GlobalProgress percent={percent} status={status} />
       {children}
     </GlobalProgressContext.Provider>
   );

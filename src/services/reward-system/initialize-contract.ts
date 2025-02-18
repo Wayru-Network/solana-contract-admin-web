@@ -11,11 +11,10 @@ interface InitializeContractProps {
     program: Program<RewardSystem>,
     provider: Provider;
     tokenMint: PublicKey;
-    mintAuthority: PublicKey;
     network?: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 }
 
-export const initializeContract = async ({ program, provider, tokenMint, network, mintAuthority }: InitializeContractProps) => {
+export const initializeContract = async ({ program, provider, tokenMint, network }: InitializeContractProps) => {
     try {
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
         const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
@@ -37,7 +36,7 @@ export const initializeContract = async ({ program, provider, tokenMint, network
             program: program.programId,
             programData: programDataAddress,
             systemProgram: SystemProgram.programId,
-            mintAuthority: mintAuthority
+            mintAuthority: provider.publicKey
         } as const
 
         const transaction = await program.methods

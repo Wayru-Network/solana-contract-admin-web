@@ -49,26 +49,71 @@ interface getAdminAccountStateProps {
 export const getContractDetails = async ({ programId, publicKey, network, tokenId }: getAdminAccountStateProps): Promise<ContractDetails | undefined> => {
     try {
         const tokenBalance = await getTokenBalance(publicKey as PublicKey, new PublicKey(tokenId), network);
+        const connection = new Connection(clusterApiUrl(network === 'mainnet' ? 'mainnet-beta' : 'devnet'));
 
-        const program = await getRewardSystemProgram(
-            programId,
-            publicKey
-        );
-        const [adminAccountPDA] = PublicKey.findProgramAddressSync(
-            [Buffer.from("admin_account")],
-            program.programId
-        );
-        const adminAccountState = await program.account.adminAccount.fetch(adminAccountPDA);
+        // Obtener los detalles del programa
+        let programAccount;
+        let upgradeAuthority = null;
+        let adminAccountState = null;
+        
+        try {
+            programAccount = await connection.getParsedAccountInfo(new PublicKey(programId));
+            
+            if (programAccount.value) {
+                const programDataAddress = await PublicKey.findProgramAddress(
+                    [new PublicKey(programId).toBuffer()],
+                    new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
+                );
+                
+                try {
+                    const programDataAccount = await connection.getAccountInfo(programDataAddress[0]);
+                    if (programDataAccount && programDataAccount.data.length >= 45) {
+                        upgradeAuthority = new PublicKey(programDataAccount.data.slice(13, 45)).toString();
+                    }
+                } catch (e) {
+                    console.log("Error getting upgrade authority:", e);
+                }
+            }
+        } catch (e) {
+            console.log("Error getting program account:", e);
+        }
+
+        try {
+            const program = await getRewardSystemProgram(
+                programId,
+                publicKey
+            );
+            
+            const [adminAccountPDA] = PublicKey.findProgramAddressSync(
+                [Buffer.from("admin_account")],
+                program.programId
+            );
+
+            try {
+                adminAccountState = await program.account.adminAccount.fetch(adminAccountPDA);
+            } catch (e) {
+                console.log("Error fetching admin account:", e);
+            }
+        } catch (e) {
+            console.log("Error getting reward system program:", e);
+        }
+
+        // Si no podemos obtener el estado de la cuenta admin, devolvemos información parcial
         return {
-            adminCandidatePubkey: adminAccountState.adminCandidatePubkey.toString(),
-            adminPubkey: adminAccountState.adminPubkey.toString(),
-            adminUpdateRequested: adminAccountState.adminUpdateRequested,
-            mintAuthorities: adminAccountState.mintAuthorities.map(authority => 
+            adminCandidatePubkey: adminAccountState?.adminCandidatePubkey?.toString() ?? "Not available",
+            adminPubkey: adminAccountState?.adminPubkey?.toString() ?? "Not available",
+            adminUpdateRequested: adminAccountState?.adminUpdateRequested ?? false,
+            mintAuthorities: adminAccountState?.mintAuthorities?.map(authority => 
                 authority.toString()
-            ),
-            paused: adminAccountState.paused,
-            validMint: adminAccountState.validMint.toString(),
-            contractTokenBalance: tokenBalance.uiAmount ?? 0
+            ) ?? [],
+            paused: adminAccountState?.paused ?? false,
+            validMint: adminAccountState?.validMint?.toString() ?? "Not available",
+            contractTokenBalance: tokenBalance.uiAmount?.toLocaleString() ?? "0",
+            programDetails: {
+                programId: programId,
+                upgradeAuthority: upgradeAuthority,
+                executable: programAccount?.value?.executable ?? false,
+            }
         }
     } catch (error) {
         console.log("error", error);

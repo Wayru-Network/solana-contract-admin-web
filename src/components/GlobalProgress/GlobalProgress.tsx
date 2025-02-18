@@ -24,7 +24,7 @@ const GlobalProgress: React.FC<GlobalProgressProps> = ({ percent, status = 'norm
         if (isVisible) {
           setIsVisible(false);
         }
-      }, 4000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -45,12 +45,6 @@ const GlobalProgress: React.FC<GlobalProgressProps> = ({ percent, status = 'norm
       closeIcon={
         <CloseOutlined style={{ color: appTheme.palette.wayru.onSurface }} />
       }
-      maskStyle={{
-        backgroundColor: 'rgba(0, 0, 0, 0.45)'
-      }}
-      bodyStyle={{
-        backgroundColor: 'transparent'
-      }}
       modalRender={(node) => (
         <div style={{ backgroundColor: 'transparent' }}>
           {React.cloneElement(node as React.ReactElement, {

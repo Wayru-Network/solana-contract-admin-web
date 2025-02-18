@@ -38,10 +38,6 @@ const AuthorityConfigs: React.FC = () => {
           isConnected: provider?.isConnected,
           publicKey: provider?.publicKey?.toString(),
         });
-        console.log("Settings state:", {
-          contractId: settings?.contractId,
-          network: settings?.network,
-        });
 
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
@@ -221,11 +217,11 @@ const AuthorityConfigs: React.FC = () => {
                   {formatWalletAddress(settings?.contractId ?? "", 18)}
                 </Typography.Text>
               </div>
-              <div style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 <Typography.Text
-                  style={{ color: appTheme.palette.text.color, marginRight: "4px" }}
+                  style={{ color: appTheme.palette.text.color }}
                 >
-                  <strong>Authority Address:</strong>
+                  <strong>Upgrade Authority Address:</strong>
                 </Typography.Text>
                 <Typography.Text
                   copyable
@@ -235,7 +231,7 @@ const AuthorityConfigs: React.FC = () => {
                   }}
                   onClick={() => viewWalletOnExplorer(settings?.contractDetails?.adminPubkey ?? "", settings?.network as "devnet" | "mainnet")}
                 >
-                  {formatWalletAddress(settings?.contractDetails?.adminPubkey ?? "", 12)}
+                  {formatWalletAddress(settings?.contractDetails?.adminPubkey ?? "", 20)}
                 </Typography.Text>
               </div>
             </div>

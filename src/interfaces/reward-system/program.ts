@@ -10,4 +10,10 @@ interface AccountState {
 export type AdminAccountState = AccountState | null;
 
 export type ContractDetails = AccountState & {
+    contractTokenBalance: string;
+    programDetails: {
+        programId: string;
+        upgradeAuthority: string | null;
+        executable: boolean;
+    }
 }
