@@ -1,21 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            buffer: 'buffer/',
             process: 'process/browser',
-            stream: 'rollup-plugin-node-polyfills/polyfills/stream',
-            util: 'rollup-plugin-node-polyfills/polyfills/util',
+            buffer: 'buffer',
+            stream: 'stream-browserify',
         },
     },
     define: {
-        'process.env': {},
+        'process.env': process.env,
         global: {},
     },
     optimizeDeps: {
@@ -25,10 +23,9 @@ export default defineConfig({
             },
             plugins: [
                 NodeGlobalsPolyfillPlugin({
-                    buffer: true,
-                    process: true
-                }),
-                NodeModulesPolyfillPlugin()
+                    process: true,
+                    buffer: true
+                })
             ]
         }
     },
