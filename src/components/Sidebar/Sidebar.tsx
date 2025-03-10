@@ -28,6 +28,11 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       label: <Link to="/authority-configs">Authority Configurations</Link>,
     },
     {
+      key: "update-admin",
+      icon: <UserAddOutlined style={{ fontSize: IconSize }} />,
+      label: <Link to="/update-admin">Update Admin</Link>,
+    },
+    {
       key: "initialize-contract",
       icon: <RocketOutlined style={{ fontSize: IconSize }} />,
       label: <Link to="/initialize-contract">Initialize Contract</Link>,
