@@ -47,7 +47,11 @@ const GlobalProgress: React.FC<GlobalProgressProps> = ({ percent, status = 'norm
       }
       modalRender={(node) => (
         <div style={{ backgroundColor: 'transparent' }}>
-          {React.cloneElement(node as React.ReactElement, {
+          {React.cloneElement(node as React.ReactElement<{
+            className?: string;
+            style?: React.CSSProperties;
+          }>, {
+            className: "custom-progress",
             style: { backgroundColor: appTheme.palette.wayru.surfaceContainerLow }
           })}
         </div>
