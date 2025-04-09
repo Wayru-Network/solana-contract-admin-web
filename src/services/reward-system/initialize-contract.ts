@@ -28,26 +28,28 @@ export const initializeContract = async ({ program, provider, tokenMint, network
             CONSTANTS.BPF_UPGRADE_LOADER_ID
         );
 
-        const accounst = {
-            user: provider.publicKey,
+        const accounts = {
+            user: provider?.publicKey,
             adminAccount: adminAccountPda,
             tokenMint: tokenMint,
             tokenProgram: TOKEN_PROGRAM_ID,
             program: program.programId,
             programData: programDataAddress,
             systemProgram: SystemProgram.programId,
-            mintAuthority: provider.publicKey
+            mintAuthority: provider?.publicKey
         } as const
 
         const transaction = await program.methods
             .initializeSystem()
-            .accounts(accounst)
+            .accounts(accounts)
             .transaction();
 
         // last block
         transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-        transaction.feePayer = provider.publicKey;
-
+        transaction.feePayer = provider?.publicKey;
+        if (!provider?.publicKey) {
+            throw new Error("Provider public key not found");
+        }
         const { signature } = await provider.signAndSendTransaction(transaction);
 
         // wait for confirmation

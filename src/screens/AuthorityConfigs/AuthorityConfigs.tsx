@@ -32,6 +32,10 @@ const AuthorityConfigs: React.FC = () => {
   const handleSubmit = async (values: AddAuthorityFormValues) => {
     startTransitionAddingAuthority(async () => {
       try {
+        if (!provider) {
+          message.error("Please connect your wallet");
+          return;
+        }
         showProgress(8);
         console.log("Starting submission with values:", values);
         console.log("Provider state:", {
@@ -73,11 +77,15 @@ const AuthorityConfigs: React.FC = () => {
   const handleRemoveAuthority = async (authority: string) => {
     startTransitionRemovingAuthority(async () => {
       try {
+        if (!provider) {
+          message.error("Please connect your wallet");
+          return;
+        }
         showProgress(10);
         console.log("authority", authority);
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
-          provider.publicKey as PublicKey
+          provider?.publicKey as PublicKey
         );
         showProgress(25);
         const txStatus = await removeMintAuthority({
@@ -286,7 +294,7 @@ const AuthorityConfigs: React.FC = () => {
                   isRemovingAuthority ||
                   !settings?.isSettingsCompleted ||
                   !settings?.contractId ||
-                  !provider.publicKey
+                  !provider?.publicKey
                 }
                 htmlType="submit"
                 block
@@ -299,7 +307,7 @@ const AuthorityConfigs: React.FC = () => {
             </Form.Item>
           </Form>
 
-          {(!settings?.isSettingsCompleted || !provider.publicKey) && (
+          {(!settings?.isSettingsCompleted || !provider?.publicKey) && (
             <Typography.Text
               style={{
                 color: appTheme.palette.error.main,

@@ -51,7 +51,7 @@ export const getContractDetails = async ({ programId, publicKey, network, tokenI
         const tokenBalance = await getTokenBalance(publicKey as PublicKey, new PublicKey(tokenId), network);
         const connection = new Connection(clusterApiUrl(network === 'mainnet' ? 'mainnet-beta' : 'devnet'));
 
-        // Obtener los detalles del programa
+        // Get the program details
         let programAccount;
         let upgradeAuthority = null;
         let adminAccountState = null;
@@ -98,7 +98,7 @@ export const getContractDetails = async ({ programId, publicKey, network, tokenI
             console.log("Error getting reward system program:", e);
         }
 
-        // Si no podemos obtener el estado de la cuenta admin, devolvemos información parcial
+        // If we cannot get the admin account state, return partial information
         return {
             adminCandidatePubkey: adminAccountState?.adminCandidatePubkey?.toString() ?? "Not available",
             adminPubkey: adminAccountState?.adminPubkey?.toString() ?? "Not available",

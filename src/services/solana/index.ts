@@ -1,7 +1,7 @@
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
-import { CONSTANTS } from 'src/constants';
-import { TokenBalanceInfo } from 'src/interfaces/solana';
+import { CONSTANTS } from '../../constants';
+import { TokenBalanceInfo } from '../../interfaces/solana';
 
 export const getTokenDetails = async (
     tokenAddress: string, 

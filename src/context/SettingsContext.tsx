@@ -13,7 +13,7 @@ import { TokenDetails } from "../interfaces/solana";
 import { getContractDetails } from "../services/reward-system/program";
 import { usePhantom } from "../hooks/usePhantom";
 import { PublicKey } from "@solana/web3.js";
-import { ContractDetails } from "src/interfaces/reward-system/program";
+import { ContractDetails } from "../interfaces/reward-system/program";
 
 export type Settings = {
   contractId: string;
@@ -29,6 +29,7 @@ interface SettingsContextType {
   setSettings: (settings: Settings) => void;
   refreshSettingsState: () => Promise<void>;
   isGettingSettings: boolean;
+  deleteSettings: () => Promise<void>;
 }
 
 export const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -43,20 +44,26 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const getSettings = useCallback(async () => {
     const programId = localStorage.getItem("programId");
     const tokenId = localStorage.getItem("tokenId");
-    const network = localStorage.getItem("network");
+    const network = localStorage.getItem("network") ?? "devnet";
     if (programId && tokenId && network) {
       startTransition(async () => {
-        const tokenDetails = await getTokenDetails(tokenId, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"], programId);
+        const tokenDetails = await getTokenDetails(
+          tokenId,
+          network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          programId
+        );
         const contractDetails = await getContractDetails({
           programId,
-          publicKey: provider.publicKey as PublicKey,
-          network: network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          publicKey: provider?.publicKey as PublicKey,
+          network:
+            network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
           tokenId: tokenId,
         });
         setSettings({
           contractId: programId,
           tokenId: tokenId,
-          network: network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          network:
+            network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
           isSettingsCompleted: true,
           tokenDetails: tokenDetails,
           contractDetails: contractDetails,
@@ -70,7 +77,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         network: "devnet",
       });
     }
-  }, [provider.publicKey]);
+  }, [provider?.publicKey]);
 
   // use effect to get the programId from the local storage
   useEffect(() => {
@@ -81,8 +88,23 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     await getSettings();
   }, [getSettings]);
 
+  const deleteSettings = useCallback(async () => {
+    localStorage.removeItem("programId");
+    localStorage.removeItem("tokenId");
+    localStorage.removeItem("network");
+    setSettings(null);
+  }, []);
+
   return (
-    <SettingsContext.Provider value={{ settings, setSettings, refreshSettingsState, isGettingSettings }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        setSettings,
+        refreshSettingsState,
+        isGettingSettings,
+        deleteSettings,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );

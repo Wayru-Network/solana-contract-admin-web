@@ -1,13 +1,4 @@
-import {
-  Card,
-  Input,
-  Form,
-  Typography,
-  Layout,
-  Switch,
-  Spin,
-  message,
-} from "antd";
+import { Input, Form, Typography, Switch, Spin, message } from "antd";
 import Button from "../../components/UI/Button";
 import { useEffect, useState, useTransition } from "react";
 import { theme as appTheme } from "../../styles/theme";
@@ -19,18 +10,28 @@ import { useGlobalProgress } from "../../hooks/useGlobalProgress";
 import { usePhantom } from "../../hooks/usePhantom";
 import { PublicKey } from "@solana/web3.js";
 import { getRewardSystemProgram } from "../../services/reward-system/program";
+import { FormCard } from "../../components/FormCard/FormCard";
+import { FormScreenWrapper } from "../../components/Wrappers/FormScreenWrapper";
 const { Title } = Typography;
-const { Content } = Layout;
+
+const FONT_SIZE_DETAILS = "14px";
 
 const Settings = () => {
   const [isPending, startTransition] = useTransition();
-  const { settings, setSettings, refreshSettingsState, isGettingSettings } =
-    useSettings();
+  const {
+    settings,
+    setSettings,
+    refreshSettingsState,
+    isGettingSettings,
+    deleteSettings,
+  } = useSettings();
   const [isError, setIsError] = useState(false);
   const { showProgress, setProgressStatus } = useGlobalProgress();
   const { provider } = usePhantom();
   const [messageApi, contextHolder] = message.useMessage();
-  const [isSwitchOn, setIsSwitchOn] = useState(!settings?.contractDetails?.paused);
+  const [isSwitchOn, setIsSwitchOn] = useState(
+    !settings?.contractDetails?.paused
+  );
 
   const handleSubmit = (values: { contractId: string; token: string }) => {
     startTransition(async () => {
@@ -52,23 +53,25 @@ const Settings = () => {
         isSettingsCompleted: true,
         tokenDetails: tokenDetails,
       });
+      refreshSettingsState();
     });
   };
 
   const handlePauseUnpause = async (pause: boolean) => {
     try {
-      if (!provider.publicKey?.toString()) {
+      if (!provider) {
         messageApi.error("Please connect your wallet");
         return;
-      }
-      else if (
+      } else if (
         settings?.contractDetails?.programDetails?.upgradeAuthority !==
         provider.publicKey?.toString()
       ) {
-        messageApi.error("Wallet connected is not the same as the upgrade authority");
+        messageApi.error(
+          "Wallet connected is not the same as the upgrade authority"
+        );
         return;
       }
-      
+
       setIsSwitchOn(pause);
       showProgress(10);
       const program = await getRewardSystemProgram(
@@ -128,83 +131,75 @@ const Settings = () => {
 
   const AddSettings = () => {
     return (
-      <Card>
-        <Title
-          level={2}
-          style={{
-            color: appTheme.palette.text.color,
-          }}
-        >
-          Settings
-        </Title>
+      <FormCard
+        title="Settings"
+        formBody={
+          <Form layout="vertical" onFinish={handleSubmit}>
+            <Form.Item
+              name="contractId"
+              label="Contract Address"
+              tooltip="Enter contract address"
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter the contract address",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Enter contract address"
+                value={settings?.contractId}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
 
-        <Form layout="vertical" onFinish={handleSubmit}>
-          <Form.Item
-            name="contractId"
-            label="Contract Address"
-            tooltip="Enter contract address for deposits"
-            rules={[
-              {
-                required: true,
-                message: "Please enter the contract address",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Enter contract address"
-              value={settings?.contractId}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
+            <Form.Item
+              name="token"
+              label="Token Address"
+              style={{ color: appTheme.palette.text.color }}
+              tooltip="Enter token address"
+              rules={[
+                { required: true, message: "Please enter the token address" },
+              ]}
+            >
+              <Input
+                placeholder="Enter token address"
+                style={{ width: "100%" }}
+                value={settings?.tokenId}
+              />
+            </Form.Item>
 
-          <Form.Item
-            name="token"
-            label="Token Address"
-            style={{ color: appTheme.palette.text.color }}
-            tooltip="Enter token address for deposits"
-            rules={[
-              { required: true, message: "Please enter the token address" },
-            ]}
-          >
-            <Input
-              placeholder="Enter token address"
-              style={{ width: "100%" }}
-              value={settings?.tokenId}
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button htmlType="submit" block loading={isPending}>
-              {isPending ? "Saving..." : "Save"}
-            </Button>
-          </Form.Item>
-        </Form>
-        {isError && (
-          <Typography.Text style={{ color: appTheme.palette.error.main }}>
-            Error: Token not found
-          </Typography.Text>
-        )}
-      </Card>
+            <Form.Item>
+              <Button htmlType="submit" block loading={isPending}>
+                {isPending ? "Saving..." : "Save"}
+              </Button>
+            </Form.Item>
+          </Form>
+        }
+        bottomComponent={
+          isError && (
+            <Typography.Text style={{ color: appTheme.palette.error.main }}>
+              Error: Token not found
+            </Typography.Text>
+          )
+        }
+      />
     );
   };
 
   const Details = () => {
-
     return (
-      <>
-        <div
+      <div>
+        <Title
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 24,
-            marginTop: -10,
+            color: appTheme.palette.text.color,
+            marginBottom: 28,
+            textAlign: "center",
           }}
+          level={2}
         >
-          <Title style={{ color: appTheme.palette.text.color }} level={4}>
-            Contract & Token Details
-          </Title>
-        </div>
+          Contract & Token Details
+        </Title>
 
         <div
           style={{
@@ -228,7 +223,7 @@ const Settings = () => {
                 <Typography.Text
                   style={{
                     color: appTheme.palette.wayru.primary,
-                    fontSize: "16px",
+                    fontSize: FONT_SIZE_DETAILS,
                     cursor: "pointer",
                   }}
                   onClick={() =>
@@ -253,7 +248,7 @@ const Settings = () => {
                   }}
                 >
                   <Typography.Text>Token Decimals:</Typography.Text>
-                  <Typography.Text style={{ fontSize: "16px" }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE_DETAILS }}>
                     {settings.tokenDetails.decimals}
                   </Typography.Text>
                 </div>
@@ -265,7 +260,7 @@ const Settings = () => {
                   }}
                 >
                   <Typography.Text>Token Supply:</Typography.Text>
-                  <Typography.Text style={{ fontSize: "16px" }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE_DETAILS }}>
                     {settings.tokenDetails.supply}
                   </Typography.Text>
                 </div>
@@ -277,7 +272,7 @@ const Settings = () => {
                   }}
                 >
                   <Typography.Text>Token Freeze Authority:</Typography.Text>
-                  <Typography.Text style={{ fontSize: "16px" }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE_DETAILS }}>
                     {settings.tokenDetails.freezeAuthority || "None"}
                   </Typography.Text>
                 </div>
@@ -289,7 +284,7 @@ const Settings = () => {
                   }}
                 >
                   <Typography.Text>Token Mint Authority:</Typography.Text>
-                  <Typography.Text style={{ fontSize: "16px" }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE_DETAILS }}>
                     {settings.tokenDetails.mintAuthority || "None"}
                   </Typography.Text>
                 </div>
@@ -310,7 +305,7 @@ const Settings = () => {
                 <Typography.Text
                   style={{
                     color: appTheme.palette.wayru.primary,
-                    fontSize: "16px",
+                    fontSize: FONT_SIZE_DETAILS,
                     cursor: "pointer",
                   }}
                   onClick={() =>
@@ -338,7 +333,7 @@ const Settings = () => {
                   <Typography.Text
                     style={{
                       color: appTheme.palette.wayru.primary,
-                      fontSize: "16px",
+                      fontSize: FONT_SIZE_DETAILS,
                       cursor: "pointer",
                     }}
                     onClick={() =>
@@ -364,7 +359,7 @@ const Settings = () => {
                   <Typography.Text
                     style={{
                       color: appTheme.palette.wayru.primary,
-                      fontSize: "16px",
+                      fontSize: FONT_SIZE_DETAILS,
                       cursor: "pointer",
                     }}
                     onClick={() =>
@@ -388,10 +383,9 @@ const Settings = () => {
                   }}
                 >
                   <Typography.Text>Contract Token Balance:</Typography.Text>
-                  <Typography.Text style={{ fontSize: "16px" }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE_DETAILS }}>
                     {settings.tokenDetails?.contractTokenBalance}
                   </Typography.Text>
-                  |
                 </div>
                 <div
                   style={{
@@ -403,7 +397,6 @@ const Settings = () => {
                   <Typography.Text>Contract Status:</Typography.Text>
                   <Switch
                     style={{
-                      width: 74,
                       borderColor: appTheme.palette.wayru.outline,
                       borderWidth: 1,
                     }}
@@ -420,35 +413,26 @@ const Settings = () => {
             )}
           </div>
         </div>
-
-        <Button onClick={() => setSettings(null)} style={{ marginTop: 16 }}>
+        <Button onClick={() => deleteSettings()} style={{ marginTop: 16 }}>
           Change Settings
         </Button>
-      </>
+      </div>
     );
   };
 
   return (
-    <Content style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <FormScreenWrapper
+      maxWidth={
+        settings?.contractId && settings?.tokenId && "45% !important"
+      }
+    >
       {contextHolder}
-      <div
-        style={{
-          display: "flex",
-          gap: "24px",
-          justifyContent: "center",
-          padding: "24px",
-          width: "100%",
-        }}
-      >
-        <div style={{ width: "80%" }}>
-          {settings?.contractId && settings?.tokenId ? (
-            <Details />
-          ) : (
-            <AddSettings />
-          )}
-        </div>
-      </div>
-    </Content>
+      {settings?.contractId && settings?.tokenId ? (
+        <Details />
+      ) : (
+        <AddSettings />
+      )}
+    </FormScreenWrapper>
   );
 };
 

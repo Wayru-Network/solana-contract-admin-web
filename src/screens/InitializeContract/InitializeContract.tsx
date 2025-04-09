@@ -9,8 +9,8 @@ import { useGlobalProgress } from "../../hooks/useGlobalProgress";
 import { initializeContract } from "../../services/reward-system/initialize-contract";
 import { getRewardSystemProgram } from "../../services/reward-system/program";
 import { useSettings } from "../../hooks/useSettings";
-
-const { Title } = Typography;
+import { FormCard } from "../../components/FormCard/FormCard";
+import { FormScreenWrapper } from "../../components/Wrappers/FormScreenWrapper";
 
 interface InitializeContractFormValues {
   mintAuthority: string;
@@ -27,10 +27,14 @@ const InitializeContract: React.FC = () => {
   const handleSubmit = async (values: InitializeContractFormValues) => {
     startTransitionInitializing(async () => {
       try {
+        if (!provider) {
+          message.error("Please connect your wallet");
+          return;
+        }
         showProgress(10);
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
-          provider.publicKey as PublicKey
+          provider?.publicKey as PublicKey
         );
         // await 1/2 second
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -71,131 +75,125 @@ const InitializeContract: React.FC = () => {
   }, [settings?.tokenId, form]);
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "24px" }}>
-      <Title
-        style={{
-          color: appTheme.palette.text.color,
-          marginBottom: 32,
-          textAlign: "center",
-        }}
-        level={2}
-      >
-        Initialize Contract
-      </Title>
-
-      <div style={{ maxWidth: 500, margin: "0 auto" }}>
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item
-            label="Upgrade Authority Contract Address:"
-            name="mintAuthority"
-            initialValue={
-              settings?.contractDetails?.programDetails?.upgradeAuthority
-            }
-          >
-            <Typography.Text
-              style={{
-                display: "block",
-                padding: "4px 11px",
-                background: "rgba(255, 255, 255, 0.1)",
-                color: appTheme.palette.text.color,
-                borderRadius: "6px",
-              }}
-            >
-              {settings?.contractDetails?.programDetails?.upgradeAuthority ||
-                "No upgrade authority address set"}
-            </Typography.Text>
-          </Form.Item>
-
-          <Form.Item
-            label="Token Mint Address:"
-            name="tokenMint"
-            initialValue={settings?.tokenId}
-          >
-            <Typography.Text
-              style={{
-                display: "block",
-                padding: "4px 11px",
-                background: "rgba(255, 255, 255, 0.1)",
-                color: appTheme.palette.text.color,
-                borderRadius: "6px",
-              }}
-            >
-              {settings?.tokenId || "No token mint address set"}
-            </Typography.Text>
-          </Form.Item>
-
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Button
-              disabled={
-                isInitializing ||
-                !provider.publicKey ||
-                Number(settings?.contractDetails?.mintAuthorities?.length) > 0
+    <FormScreenWrapper>
+      <FormCard
+        title="Initialize Contract"
+        formBody={
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form.Item
+              label="Upgrade Authority Contract Address:"
+              name="mintAuthority"
+              initialValue={
+                settings?.contractDetails?.programDetails?.upgradeAuthority
               }
-              htmlType="submit"
-              block
-              loading={isInitializing}
             >
-              {isInitializing ? "Initializing..." : "Initialize Contract"}
-            </Button>
-          </Form.Item>
-        </Form>
+              <Typography.Text
+                style={{
+                  display: "block",
+                  padding: "4px 11px",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  color: appTheme.palette.text.color,
+                  borderRadius: "6px",
+                }}
+              >
+                {settings?.contractDetails?.programDetails?.upgradeAuthority ||
+                  "No upgrade authority address set"}
+              </Typography.Text>
+            </Form.Item>
 
-        {Number(settings?.contractDetails?.mintAuthorities?.length) > 0 && (
-          <Typography.Text
-            style={{
-              color: appTheme.palette.wayru.secondary,
-              display: "block",
-              textAlign: "center",
-              marginTop: "16px",
-            }}
-          >
-            Contract already initialized
-          </Typography.Text>
-        )}
-
-        {!settings?.tokenId && (
-          <Typography.Text
-            style={{
-              color: appTheme.palette.error.main,
-              display: "block",
-              textAlign: "center",
-              marginTop: "16px",
-            }}
-          >
-            Please settings the token mint address first
-          </Typography.Text>
-        )}
-
-        {!provider.publicKey && (
-          <Typography.Text
-            style={{
-              color: appTheme.palette.error.main,
-              display: "block",
-              textAlign: "center",
-              marginTop: "16px",
-            }}
-          >
-            Please connect your wallet to initialize the contract
-          </Typography.Text>
-        )}
-
-        {settings?.contractDetails?.programDetails?.upgradeAuthority !==
-          provider.publicKey?.toString() &&
-          Number(settings?.contractDetails?.mintAuthorities?.length) === 0 && (
-            <Typography.Text
-              style={{
-                color: appTheme.palette.error.main,
-                display: "block",
-                textAlign: "center",
-                marginTop: "16px",
-              }}
+            <Form.Item
+              label="Token Mint Address:"
+              name="tokenMint"
+              initialValue={settings?.tokenId}
             >
-              Connected wallet does not match the upgrade authority contract
-              address
-            </Typography.Text>
-          )}
-      </div>
-    </div>
+              <Typography.Text
+                style={{
+                  display: "block",
+                  padding: "4px 11px",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  color: appTheme.palette.text.color,
+                  borderRadius: "6px",
+                }}
+              >
+                {settings?.tokenId || "No token mint address set"}
+              </Typography.Text>
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Button
+                disabled={
+                  isInitializing ||
+                  !provider?.publicKey ||
+                  Number(settings?.contractDetails?.mintAuthorities?.length) > 0
+                }
+                htmlType="submit"
+                block
+                loading={isInitializing}
+              >
+                {isInitializing ? "Initializing..." : "Initialize Contract"}
+              </Button>
+            </Form.Item>
+          </Form>
+        }
+        bottomComponent={
+          <div>
+            {Number(settings?.contractDetails?.mintAuthorities?.length) > 0 && (
+              <Typography.Text
+                style={{
+                  color: appTheme.palette.wayru.secondary,
+                  display: "block",
+                  textAlign: "center",
+                  marginTop: "16px",
+                }}
+              >
+                Contract already initialized
+              </Typography.Text>
+            )}
+
+            {!settings?.tokenId ? (
+              <Typography.Text
+                style={{
+                  color: appTheme.palette.error.main,
+                  display: "block",
+                  textAlign: "center",
+                  marginTop: "16px",
+                }}
+              >
+                Please settings the token mint address first
+              </Typography.Text>
+            ) : !provider?.publicKey ? (
+              <Typography.Text
+                style={{
+                  color: appTheme.palette.error.main,
+                  display: "block",
+                  textAlign: "center",
+                  marginTop: "16px",
+                }}
+              >
+                Please connect your wallet to initialize the contract
+              </Typography.Text>
+            ) : (
+              settings?.contractDetails?.programDetails?.upgradeAuthority !==
+                provider?.publicKey?.toString() &&
+              Number(settings?.contractDetails?.mintAuthorities?.length) ===
+                0 && (
+                <Typography.Text
+                  style={{
+                    color: appTheme.palette.error.main,
+                    display: "block",
+                    textAlign: "center",
+                    marginTop: "16px",
+                  }}
+                >
+                  Connected wallet does not match the upgrade authority contract
+                  address
+                </Typography.Text>
+              )
+            )}
+          </div>
+        }
+      />
+    </FormScreenWrapper>
   );
 };
 

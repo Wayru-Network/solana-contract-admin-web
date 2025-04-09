@@ -17,7 +17,7 @@ import {
     Connection,
     clusterApiUrl,
 } from "@solana/web3.js";
-import { CONSTANTS } from "src/constants";
+import { CONSTANTS } from "../../constants";
 import { getTxStatus } from "../solana";
 
 interface FundTokenStorageProps {
