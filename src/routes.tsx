@@ -5,7 +5,7 @@ import FundContract from "./screens/FundContract/FundContract";
 import AuthorityConfigurations from "./screens/AuthorityConfigs/AuthorityConfigs";
 import InitializeContract from "./screens/InitializeContract/InitializeContract";
 import UpdateAdmin from "./screens/UpdateAdmin/UpdateAdmin";
-import DeployProgram from "./screens/DeployProgram/DeployProgram";
+import MintTokens from "./screens/MintTokens/MintTokens";
 
 export const router = createBrowserRouter([
   {
@@ -37,8 +37,8 @@ export const router = createBrowserRouter([
         element: <InitializeContract />,
       },
       {
-        path: "deploy-program",
-        element: <DeployProgram />,
+        path: "mint-tokens",
+        element: <MintTokens />,
       },
     ],
   },
