@@ -42,6 +42,11 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       icon: <SettingOutlined style={{ fontSize: IconSize }} />,
       label: <Link to="/settings">Settings</Link>,
     },
+    {
+      key: "deploy-program",
+      icon: <RocketOutlined style={{ fontSize: IconSize }} />,
+      label: <Link to="/deploy-program">Deploy Program</Link>,
+    },
   ];
 
   return (

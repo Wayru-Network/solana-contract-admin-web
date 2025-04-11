@@ -5,6 +5,7 @@ import FundContract from "./screens/FundContract/FundContract";
 import AuthorityConfigurations from "./screens/AuthorityConfigs/AuthorityConfigs";
 import InitializeContract from "./screens/InitializeContract/InitializeContract";
 import UpdateAdmin from "./screens/UpdateAdmin/UpdateAdmin";
+import DeployProgram from "./screens/DeployProgram/DeployProgram";
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: "initialize-contract",
         element: <InitializeContract />,
+      },
+      {
+        path: "deploy-program",
+        element: <DeployProgram />,
       },
     ],
   },
