@@ -1,5 +1,6 @@
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
-import { Program } from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor/dist/cjs/program";
+
 import { Provider } from "../../interfaces/phantom/phantom";
 
 import { BN } from "@coral-xyz/anchor";

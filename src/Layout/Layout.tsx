@@ -31,6 +31,8 @@ const LayoutComponent: React.FC = () => {
           style={{
             margin: "24px 16px",
             padding: 24,
+            paddingTop: 0,
+            marginTop: 0,
             minHeight: 280,
             flex: 1,
             overflow: "auto",

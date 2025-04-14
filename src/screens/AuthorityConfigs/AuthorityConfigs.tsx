@@ -27,7 +27,7 @@ const AuthorityConfigs: React.FC = () => {
   const [isRemovingAuthority, startTransitionRemovingAuthority] =
     useTransition();
   const { settings, refreshSettingsState } = useSettings();
-  const { showProgress, setProgressStatus } = useGlobalProgress();
+  const { setProgressState } = useGlobalProgress();
 
   const handleSubmit = async (values: AddAuthorityFormValues) => {
     startTransitionAddingAuthority(async () => {
@@ -36,7 +36,7 @@ const AuthorityConfigs: React.FC = () => {
           message.error("Please connect your wallet");
           return;
         }
-        showProgress(8);
+        setProgressState({ percent: 8 });
         console.log("Starting submission with values:", values);
         console.log("Provider state:", {
           isConnected: provider?.isConnected,
@@ -47,7 +47,7 @@ const AuthorityConfigs: React.FC = () => {
           settings?.contractId as string,
           provider.publicKey as PublicKey
         );
-        showProgress(25);
+        setProgressState({ percent: 25 });
 
         const txStatus = await AddMintAuthority({
           program: program,
@@ -55,21 +55,19 @@ const AuthorityConfigs: React.FC = () => {
           provider: provider,
           network: settings?.network,
         });
-        showProgress(70);
+        setProgressState({ percent: 70 });
 
         console.log("Transaction completed:", txStatus);
         if (txStatus.status === "confirmed") {
           console.log("Refreshing settings state");
           await refreshSettingsState();
           form.resetFields();
-          showProgress(100);
-          setProgressStatus("success");
+          setProgressState({ percent: 100, status: 'success' });
         }
         message.success("Authority added successfully");
       } catch (error) {
         console.error("Detailed error in handleSubmit:", error);
-        showProgress(100);
-        setProgressStatus("exception");
+        setProgressState({ percent: 100, status: 'exception' });
       }
     });
   };
@@ -81,32 +79,30 @@ const AuthorityConfigs: React.FC = () => {
           message.error("Please connect your wallet");
           return;
         }
-        showProgress(10);
+        setProgressState({ percent: 10 });
         console.log("authority", authority);
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
           provider?.publicKey as PublicKey
         );
-        showProgress(25);
+        setProgressState({ percent: 25 });
         const txStatus = await removeMintAuthority({
           program: program,
           mintAuthorityToRemove: new PublicKey(authority),
           provider: provider,
           network: settings?.network,
         });
-        showProgress(70);
+        setProgressState({ percent: 70 });
         if (txStatus.status === "confirmed") {
           console.log("Refreshing settings state");
           await refreshSettingsState();
-          showProgress(100);
-          setProgressStatus("success");
+          setProgressState({ percent: 100, status: 'success' });
         }
         console.log("Transaction completed:", txStatus);
         message.success("Authority removed successfully");
       } catch (error) {
         console.error("Error removing authority:", error);
-        showProgress(100);
-        setProgressStatus("exception");
+        setProgressState({ percent: 100, status: 'exception' });
       }
     });
   };

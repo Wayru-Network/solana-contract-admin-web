@@ -25,3 +25,10 @@
 .custom-steps .ant-steps-item-finish .ant-steps-item-title {
   color: #91DB00 !important; 
 }
+
+/* Styles for placeholders */
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important; /* More transparent */
+  font-style: italic; /* Optional: italic style to differentiate */
+}

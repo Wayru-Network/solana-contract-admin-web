@@ -11,8 +11,8 @@ import { App as AntApp } from 'antd';
 
 function App() {
   return (
-    <AntApp>
-      <GlobalProgressProvider>
+    <GlobalProgressProvider>
+      <AntApp>
         <ConfigProvider
           theme={{
             components: {
@@ -77,8 +77,8 @@ function App() {
             </SettingsProvider>
           </PhantomProvider>
         </ConfigProvider>
-      </GlobalProgressProvider>
-    </AntApp>
+      </AntApp>
+    </GlobalProgressProvider>
   );
 }
 

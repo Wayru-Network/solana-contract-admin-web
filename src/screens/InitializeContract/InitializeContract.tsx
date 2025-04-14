@@ -21,7 +21,7 @@ const InitializeContract: React.FC = () => {
   const [form] = Form.useForm();
   const { provider } = usePhantom();
   const [isInitializing, startTransitionInitializing] = useTransition();
-  const { showProgress, setProgressStatus } = useGlobalProgress();
+  const { setProgressState } = useGlobalProgress();
   const { settings, refreshSettingsState } = useSettings();
 
   const handleSubmit = async (values: InitializeContractFormValues) => {
@@ -31,14 +31,14 @@ const InitializeContract: React.FC = () => {
           message.error("Please connect your wallet");
           return;
         }
-        showProgress(10);
+        setProgressState({ percent: 10 });
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
           provider?.publicKey as PublicKey
         );
         // await 1/2 second
         await new Promise((resolve) => setTimeout(resolve, 500));
-        showProgress(20);
+        setProgressState({ percent: 20 });
         const { status } = await initializeContract({
           program,
           provider,
@@ -46,20 +46,17 @@ const InitializeContract: React.FC = () => {
           network: settings?.network,
         });
         await new Promise((resolve) => setTimeout(resolve, 500));
-        showProgress(50);
+        setProgressState({ percent: 50 });
         await new Promise((resolve) => setTimeout(resolve, 500));
         if (status === "confirmed") {
           await refreshSettingsState();
-          showProgress(100);
-          setProgressStatus("success");
+          setProgressState({ percent: 100, status: 'success' });
           return;
         }
-        showProgress(100);
-        setProgressStatus("exception");
+        setProgressState({ percent: 100, status: 'exception' });
       } catch (error) {
         console.error("Error initializing contract:", error);
-        showProgress(100);
-        setProgressStatus("exception");
+        setProgressState({ percent: 100, status: 'exception' });
         message.error("Failed to initialize contract");
       }
     });
