@@ -81,21 +81,21 @@ const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals
 
 
 const createMintToInstructions = ({ mint, destination, authority, amount, decimals }: CreateMintToInstructionParams) => {
-    // Clean the amount (remove commas)
+    // clean the amount (remove commas)
     const cleanAmount = typeof amount === 'string' ?
         amount.replace(/,/g, '') :
         amount.toString();
 
-    // Convert to number (for small amounts) or use BigInt (for large amounts)
-    const numericAmount = Number(cleanAmount);
-
-    // Adjust for decimals (multiply by 10^decimals)
-    const adjustedAmount = decimals > 0
-        ? BigInt(Math.floor(numericAmount * Math.pow(10, decimals)))
-        : BigInt(numericAmount);
-
-    console.log('Original amount:', numericAmount);
-    console.log('Adjusted for decimals:', adjustedAmount.toString());
+    // Manual construction of the value with the decimals
+    // Example: 50 with 6 decimals = 50000000 (50 followed by 6 zeros)
+    const fullAmount = cleanAmount + '0'.repeat(decimals);
+    
+    console.log('Original amount:', cleanAmount);
+    console.log('Decimals:', decimals);
+    console.log('Full amount with decimals:', fullAmount);
+    
+    // Convert to BigInt after building the complete string
+    const adjustedAmount = BigInt(fullAmount);
 
     const mintToInstruction = createMintToInstruction(
         mint,
