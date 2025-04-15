@@ -1,4 +1,5 @@
-import { Program } from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor/dist/cjs/program";
+
 import { clusterApiUrl, PublicKey, Transaction } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants/index";
 import { Connection } from "@solana/web3.js";

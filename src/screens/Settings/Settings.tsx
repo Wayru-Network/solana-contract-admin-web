@@ -26,7 +26,7 @@ const Settings = () => {
     deleteSettings,
   } = useSettings();
   const [isError, setIsError] = useState(false);
-  const { showProgress, setProgressStatus } = useGlobalProgress();
+  const { setProgressState } = useGlobalProgress();
   const { provider } = usePhantom();
   const [messageApi, contextHolder] = message.useMessage();
   const [isSwitchOn, setIsSwitchOn] = useState(
@@ -73,14 +73,14 @@ const Settings = () => {
       }
 
       setIsSwitchOn(pause);
-      showProgress(10);
+      setProgressState({ percent: 10 });
       const program = await getRewardSystemProgram(
         settings?.contractId as string,
         provider.publicKey as PublicKey
       );
       // await 1/2 second
       await new Promise((resolve) => setTimeout(resolve, 500));
-      showProgress(20);
+      setProgressState({ percent: 20 });
       const txStatus = await pauseUnpauseContract({
         program,
         provider,
@@ -91,17 +91,14 @@ const Settings = () => {
 
       if (txStatus?.status === "confirmed") {
         await refreshSettingsState();
-        showProgress(100);
-        setProgressStatus("success");
+        setProgressState({ percent: 100, status: 'success' });
       } else {
-        showProgress(100);
-        setProgressStatus("exception");
+        setProgressState({ percent: 100, status: 'exception' });
       }
       refreshSettingsState();
     } catch (error) {
       console.error(error);
-      showProgress(100);
-      setProgressStatus("exception");
+      setProgressState({ percent: 100, status: 'exception' });
       refreshSettingsState();
     }
   };

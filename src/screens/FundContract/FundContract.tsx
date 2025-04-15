@@ -24,7 +24,7 @@ const FundContract: React.FC = () => {
   const { provider } = usePhantom();
   const [isPending, startTransition] = useTransition();
   const { settings, refreshSettingsState } = useSettings();
-  const { showProgress, setProgressStatus } = useGlobalProgress();
+  const { setProgressState } = useGlobalProgress();
 
   const handleSubmit = async (values: FundContractFormValues) => {
     startTransition(async () => {
@@ -33,33 +33,31 @@ const FundContract: React.FC = () => {
           message.error("Please connect your wallet");
           return;
         }
-        showProgress(10);
+        setProgressState({ percent: 10 });
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
           provider?.publicKey as PublicKey
         );
         // await 1/2 second
         await new Promise((resolve) => setTimeout(resolve, 500));
-        showProgress(20);
+        setProgressState({ percent: 20 });
         const { status, signature } = await fundContractToken({
           program,
           userPublicKey: provider?.publicKey as PublicKey,
           mint: new PublicKey(settings?.tokenId as string),
-          amount: new BN(convertToTokenAmount(Number(values.amount))),
+          amount: new BN(convertToTokenAmount(Number(values.amount), settings?.tokenDetails?.decimals)),
           provider: provider,
           network: settings?.network,
         });
         await new Promise((resolve) => setTimeout(resolve, 500));
-        showProgress(50);
+        setProgressState({ percent: 50 });
         await new Promise((resolve) => setTimeout(resolve, 500));
         if (status === "confirmed") {
           await refreshSettingsState();
-          showProgress(100);
-          setProgressStatus("success");
+          setProgressState({ percent: 100, status: 'success' });
           form.resetFields();
         } else {
-          showProgress(100);
-          setProgressStatus("exception");
+          setProgressState({ percent: 100, status: 'exception' });
           form.resetFields();
         }
 
@@ -68,8 +66,7 @@ const FundContract: React.FC = () => {
       } catch (error) {
         message.error("FundContract failed");
         console.log("handleSubmit error", error);
-        showProgress(100);
-        setProgressStatus("exception");
+        setProgressState({ percent: 100, status: 'exception' });
         form.resetFields();
       }
     });

@@ -1,5 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor/dist/cjs/program";
+
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
 import { clusterApiUrl } from "@solana/web3.js";
 import { Connection, PublicKey } from "@solana/web3.js";
@@ -28,10 +29,10 @@ export const getRewardSystemProgram = async (rewardSystemProgramId: string, publ
     const programId = new anchor.web3.PublicKey(rewardSystemProgramId);
 
     //only for dev net because it required fee
-    const idl = await anchor.Program.fetchIdl(programId, provider);
+    const idl = await Program.fetchIdl(programId, provider);
     if (!idl) throw new Error("IDL not found");
 
-    const program = await anchor.Program.at(
+    const program = await Program.at(
         programId,
         provider
     ) as Program<RewardSystem>;

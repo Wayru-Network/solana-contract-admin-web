@@ -3,7 +3,8 @@ import {
   SettingOutlined,
   DeliveredProcedureOutlined,
   UserAddOutlined,
-  RocketOutlined
+  RocketOutlined,
+  DollarOutlined
 } from "@ant-design/icons";
 import { Link, useLocation } from "react-router-dom";
 import { theme as appTheme } from "../../styles/theme";
@@ -12,7 +13,7 @@ import Logo from "../../assets/logo-green.png";
 const { Sider } = Layout;
 
 export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
-  const IconSize = 15;
+  const IconSize = 17;
   const location = useLocation();
   const currentPath = location.pathname.substring(1) || "settings"; // Remove leading slash
 
@@ -38,10 +39,15 @@ export const Sidebar = ({ collapsed }: { collapsed: boolean }) => {
       label: <Link to="/initialize-contract">Initialize Contract</Link>,
     },
     {
+      key: "mint-tokens",
+      icon: <DollarOutlined style={{ fontSize: IconSize }} />,
+      label: <Link to="/mint-tokens">Mint Tokens</Link>,
+    },
+    {
       key: "settings",
       icon: <SettingOutlined style={{ fontSize: IconSize }} />,
       label: <Link to="/settings">Settings</Link>,
-    },
+    }
   ];
 
   return (

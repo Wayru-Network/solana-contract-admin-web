@@ -4,45 +4,51 @@ import GlobalProgress from '../components/GlobalProgress/GlobalProgress';
 import { ProgressProps } from 'antd';
 
 interface GlobalProgressContextType {
-  showProgress: (initialPercent?: number) => void;
   hideProgress: () => void;
-  updateProgress: (percent: number) => void;
-  setProgressStatus: (status: ProgressProps['status']) => void;
+  setProgressState: (newState: {
+    percent: number;
+    status?: ProgressProps['status'];
+  }) => void;
 }
 
 export const GlobalProgressContext = createContext<GlobalProgressContextType | undefined>(undefined);
 
 export const GlobalProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [percent, setPercent] = useState(0);
-  const [status, setStatus] = useState<ProgressProps['status']>('normal');
-
-  const showProgress = (initialPercent: number = 0) => {
-    setPercent(initialPercent);
-    setStatus('normal');
-  };
+  const [state, setState] = useState<{
+    status: ProgressProps['status'];
+    percent: number;
+  }>({
+    status: 'normal',
+    percent: 0,
+  });
 
   const hideProgress = () => {
-    setPercent(0);
+    setState({
+      ...state,
+      percent: 0,
+      status: 'normal',
+    });
   };
 
-  const updateProgress = (newPercent: number) => {
-    setPercent(newPercent);
-  };
 
-  const setProgressStatus = (newStatus: ProgressProps['status']) => {
-    setStatus(newStatus);
+  const setProgressState = (newState: {
+    percent: number;
+    status?: ProgressProps['status'];
+  }) => {
+    setState({
+      ...state,
+      ...newState,
+    });
   };
 
   return (
     <GlobalProgressContext.Provider
       value={{
-        showProgress,
         hideProgress,
-        updateProgress,
-        setProgressStatus,
+        setProgressState
       }}
     >
-      <GlobalProgress percent={percent} status={status} />
+      <GlobalProgress percent={state.percent} status={state.status} hideProgress={hideProgress} />
       {children}
     </GlobalProgressContext.Provider>
   );

@@ -14,3 +14,9 @@ export interface TokenBalanceInfo {
     exists: boolean;
     address: string;
 }
+
+export interface TransactionStatus {
+    signature: string;
+    status?: 'processed' | 'confirmed' | 'finalized';
+    updated?: boolean;
+}

@@ -1,11 +1,10 @@
 import { Provider } from "../../interfaces/phantom/phantom";
-import { Program } from "@coral-xyz/anchor";
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
 import { clusterApiUrl, Connection, PublicKey, SystemProgram } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { getTxStatus } from "../solana";
-
+import { Program } from "@coral-xyz/anchor/dist/cjs/program";
 
 interface InitializeContractProps {
     program: Program<RewardSystem>,
