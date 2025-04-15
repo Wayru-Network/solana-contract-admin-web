@@ -23,7 +23,7 @@ const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals
         lamports,
         programId: TOKEN_PROGRAM_ID,
     });
-    
+
     // Initialize mint
     const initializeMintInstruction = createInitializeMintInstruction(
         mintKeypair.publicKey,
@@ -32,7 +32,7 @@ const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals
         provider.publicKey,
         TOKEN_PROGRAM_ID
     );
-    
+
     instructions.push(createAccountInstruction);
     instructions.push(initializeMintInstruction);
 
@@ -45,7 +45,7 @@ const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals
         ],
         TOKEN_METADATA_PROGRAM_ID
     );
-    
+
     const createMetadataInstruction = createCreateMetadataAccountV3Instruction(
         {
             metadata: metadataAddress,
@@ -70,7 +70,7 @@ const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals
             },
         }
     );
-    
+
     instructions.push(createMetadataInstruction);
 
     return {
@@ -128,11 +128,11 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
         const { instructions: createTokenInstructions, mintKeypair } =
             await createTokenWithMetadataInstructions({
                 name,
-                symbol, 
-                uri, 
-                decimals, 
-                connection, 
-                provider, 
+                symbol,
+                uri,
+                decimals,
+                connection,
+                provider,
                 customMintKeypair
             });
 
@@ -178,24 +178,18 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = provider.publicKey;
 
+        // Always sign with the mintKeypair
+        transaction.partialSign(mintKeypair);
+
+        // Then Phantom signs for the user
         try {
-            // Sign with the customMintKeypair if it exists
-            if (customMintKeypair) {
-                transaction.partialSign(customMintKeypair);
-            }
-            
-            // Sign and send    
-            const signedTx = await provider.signTransaction(transaction);
-            const signature = await connection.sendRawTransaction(signedTx.serialize());
-            console.log("Transaction sent with signature:", signature);
+            const { signature } = await provider.signAndSendTransaction(transaction);
             
             const txStatus = await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
             return { txStatus };
         } catch (error) {
-            console.error("Transaction error:", error);
-            if (error instanceof Error && 'logs' in error) {
-                console.error("Transaction logs:", error.logs);
-            }
+            console.error("Error in signature:", error);
+            // More detailed error handling...
             return {
                 txStatus: {
                     status: 'exception',
@@ -204,13 +198,16 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
             };
         }
     } catch (error) {
-        console.error(error);
+        console.error("Transaction error:", error);
+        if (error instanceof Error && 'logs' in error) {
+            console.error("Transaction logs:", error.logs);
+        }
         return {
             txStatus: {
                 status: 'exception',
                 message: error instanceof Error ? error.message : 'An unknown error occurred'
             }
-        }
+        };
     }
 }
 
