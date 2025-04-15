@@ -47,11 +47,6 @@ export const MintTokensForm = ({
     form.setFieldValue("totalSupply", formattedValue);
   };
 
-  console.log( 'validations',
-      (mintKeyStatus?.exists && mintKeyStatus?.isToken) ||
-      (mintKeyStatus?.exists && !mintKeyStatus?.isToken)
-  );
-
   return (
     <Form form={form} layout="vertical" onFinish={onSubmit}>
       <Row gutter={[16, 0]}>
