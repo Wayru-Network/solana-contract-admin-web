@@ -22,7 +22,7 @@ export const KeypairStatus = ({
       />
     );
   
-    // Si estamos verificando, mostrar spinner
+    // if we are checking the mint keypair status, show the spinner
     if (isCheckingMintKeyStatus) {
       return (
         <div style={{
@@ -39,8 +39,8 @@ export const KeypairStatus = ({
       );
     }
   
-    // Si tenemos una dirección pero no hay token (o no hemos verificado aún)
-    if (mintKeypairAddress && (!mintKeyStatus || !mintKeyStatus.exists || !mintKeyStatus.isToken)) {
+    // to show the mint keypair address
+    if (mintKeypairAddress && (!mintKeyStatus || !mintKeyStatus.exists)) {
       return (
         <Typography.Text style={{
           fontSize: "12px",
@@ -48,12 +48,27 @@ export const KeypairStatus = ({
           marginTop: "4px",
           display: "block",
         }}>
-          Mint address: {formatWalletAddress(mintKeypairAddress, 13)}
+          Mint address: {mintKeypairAddress}
         </Typography.Text>
       );
     }
   
-    // Si tiene un token asociado
+    // for valid keypairs that exist but are not tokens
+    if (mintKeypairAddress && mintKeyStatus?.exists && !mintKeyStatus.isToken) {
+      return (
+        <Typography.Text style={{
+          fontSize: "12px",
+          color: appTheme.palette.wayru.error,
+          marginTop: "4px",
+          display: "block",
+        }}>
+          <div>Address: {mintKeypairAddress}</div>
+          <div>{mintKeyStatus.message}</div>
+        </Typography.Text>
+      );
+    }
+  
+    // if the mint keypair address has a token associated
     if (mintKeyStatus?.exists && mintKeyStatus?.isToken) {
       return (
         <Typography.Text style={{
@@ -76,7 +91,7 @@ export const KeypairStatus = ({
       );
     }
   
-    // Otros estados
+    // other states
     if (mintKeyStatus) {
       return (
         <Typography.Text style={{
