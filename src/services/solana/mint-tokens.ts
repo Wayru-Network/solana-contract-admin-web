@@ -155,7 +155,7 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
         });
 
         // 4. Create instruction to revoke the mint authority
-        const revokeAuthorityInstruction = createSetAuthorityInstruction(
+        const revokeMintAuthorityInstruction = createSetAuthorityInstruction(
             mintKeypair.publicKey,
             provider.publicKey,
             AuthorityType.MintTokens,
@@ -164,14 +164,25 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
             TOKEN_PROGRAM_ID
         );
 
-        // 5. Create a single transaction with all the instructions
+        // 5. Create instruction to revoke the freeze authority
+        const revokeFreezeAuthorityInstruction = createSetAuthorityInstruction(
+            mintKeypair.publicKey,
+            provider.publicKey,
+            AuthorityType.FreezeAccount,
+            null,
+            [],
+            TOKEN_PROGRAM_ID
+        );
+
+        // 6. Create a single transaction with all the instructions
         const transaction = new Transaction();
 
         // Add all the instructions
         createTokenInstructions.forEach(instruction => transaction.add(instruction));
         createdATAInstructions.forEach(instruction => transaction.add(instruction));
         mintToInstructions.forEach(instruction => transaction.add(instruction));
-        transaction.add(revokeAuthorityInstruction);
+        transaction.add(revokeMintAuthorityInstruction);
+        transaction.add(revokeFreezeAuthorityInstruction);
 
         // Configure the transaction
         const { blockhash } = await connection.getLatestBlockhash();
