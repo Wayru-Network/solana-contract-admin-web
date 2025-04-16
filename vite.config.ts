@@ -6,7 +6,10 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 export default defineConfig({
   plugins: [react()],
   define: {
-    'process.env': process.env
+    'process.env': {
+      ...process.env,
+      VITE_SOLANA_MAINNET_RPC_URL: process.env.VITE_SOLANA_MAINNET_RPC_URL
+    }
   },
   optimizeDeps: {
     esbuildOptions: {

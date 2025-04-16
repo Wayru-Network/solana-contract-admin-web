@@ -89,11 +89,11 @@ const createMintToInstructions = ({ mint, destination, authority, amount, decima
     // Manual construction of the value with the decimals
     // Example: 50 with 6 decimals = 50000000 (50 followed by 6 zeros)
     const fullAmount = cleanAmount + '0'.repeat(decimals);
-    
+
     console.log('Original amount:', cleanAmount);
     console.log('Decimals:', decimals);
     console.log('Full amount with decimals:', fullAmount);
-    
+
     // Convert to BigInt after building the complete string
     const adjustedAmount = BigInt(fullAmount);
 
@@ -121,8 +121,14 @@ const createMintToInstructions = ({ mint, destination, authority, amount, decima
  */
 export const mintTokens = async ({ network, provider, name, symbol, uri, decimals, amount, recipientAddress, customMintKeypair }: MintTokensProps) => {
     try {
+        console.log('process.env.VITE_SOLANA_MAINNET_RPC_URL', import.meta.env.VITE_SOLANA_MAINNET_RPC_URL);
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+        const connectionEndpoint = network === "mainnet"
+            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+            : clusterApiUrl(networkConnection);
+
+        console.log('api url', connectionEndpoint);
+        const connection = new Connection(connectionEndpoint, "confirmed");
 
         // 1. Get instructions to create the token and metadata
         const { instructions: createTokenInstructions, mintKeypair } =
@@ -195,7 +201,7 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
         // Then Phantom signs for the user
         try {
             const { signature } = await provider.signAndSendTransaction(transaction);
-            
+
             const txStatus = await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
             return { txStatus };
         } catch (error) {
