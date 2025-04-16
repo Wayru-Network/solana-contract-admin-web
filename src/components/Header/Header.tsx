@@ -70,7 +70,7 @@ export const HeaderComponent = () => {
           {publicKey ? "Disconnect" : "Connect"}
         </Button>
         <Select
-          value={settings?.network || "Mainnet"}
+          value={settings?.network || "mainnet"}
           optionFilterProp="label"
           disabled={true}
           showSearch
