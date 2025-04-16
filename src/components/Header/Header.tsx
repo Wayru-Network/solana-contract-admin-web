@@ -81,7 +81,7 @@ export const HeaderComponent = () => {
             { value: "devnet", label: "Devnet" },
             { value: "mainnet", label: "Mainnet" },
           ]}
-          defaultValue="Mainnet"
+          defaultValue="mainnet"
         />
       </div>
     </Header>
