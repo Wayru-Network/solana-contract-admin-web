@@ -44,7 +44,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const getSettings = useCallback(async () => {
     const programId = localStorage.getItem("programId");
     const tokenId = localStorage.getItem("tokenId");
-    const network = localStorage.getItem("network") ?? "mainnet";
+    const network = "mainnet"; //localStorage.getItem("network") ?? "mainnet";
     if (programId && tokenId && network) {
       startTransition(async () => {
         const tokenDetails = await getTokenDetails(
