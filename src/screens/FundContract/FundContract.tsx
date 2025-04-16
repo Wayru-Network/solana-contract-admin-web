@@ -36,7 +36,8 @@ const FundContract: React.FC = () => {
         setProgressState({ percent: 10 });
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
-          provider?.publicKey as PublicKey
+          provider?.publicKey as PublicKey,
+          "mainnet"
         );
         // await 1/2 second
         await new Promise((resolve) => setTimeout(resolve, 500));
