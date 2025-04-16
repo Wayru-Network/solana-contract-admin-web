@@ -121,7 +121,6 @@ const createMintToInstructions = ({ mint, destination, authority, amount, decima
  */
 export const mintTokens = async ({ network, provider, name, symbol, uri, decimals, amount, recipientAddress, customMintKeypair }: MintTokensProps) => {
     try {
-        console.log('process.env.VITE_SOLANA_MAINNET_RPC_URL', import.meta.env.VITE_SOLANA_MAINNET_RPC_URL);
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
         const connectionEndpoint = network === "mainnet"
             ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
