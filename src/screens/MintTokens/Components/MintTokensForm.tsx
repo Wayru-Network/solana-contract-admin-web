@@ -93,16 +93,6 @@ export const MintTokensForm = ({
             rules={[
               { required: true, message: "Please enter the metadata url" },
               { min: 20, message: "URL must be at least 10 characters long" },
-              {
-                validator: (_, value) => {
-                  if (!value) return Promise.resolve();
-                  return /^https:\/\/ipfs/.test(value)
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error('URL must start with "https://ipfs"')
-                      );
-                },
-              },
             ]}
           >
             <Input placeholder="https://ipfs.algonode.xyz/ipfs/..." />
