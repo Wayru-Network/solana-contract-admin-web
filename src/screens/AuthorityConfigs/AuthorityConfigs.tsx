@@ -45,7 +45,8 @@ const AuthorityConfigs: React.FC = () => {
 
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
-          provider.publicKey as PublicKey
+          provider.publicKey as PublicKey,
+          "mainnet"
         );
         setProgressState({ percent: 25 });
 
@@ -83,7 +84,8 @@ const AuthorityConfigs: React.FC = () => {
         console.log("authority", authority);
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
-          provider?.publicKey as PublicKey
+          provider?.publicKey as PublicKey,
+          "mainnet"
         );
         setProgressState({ percent: 25 });
         const txStatus = await removeMintAuthority({
