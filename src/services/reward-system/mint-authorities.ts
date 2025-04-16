@@ -68,7 +68,10 @@ export const AddMintAuthority = async ({
             transaction.add(ix);
 
             const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-            const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+            const connectionEndpoint = network === "mainnet"
+                ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+                : clusterApiUrl(networkConnection);
+            const connection = new Connection(connectionEndpoint, "confirmed");
 
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
@@ -141,7 +144,10 @@ export const removeMintAuthority = async ({
             transaction.add(ix);
 
             const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-            const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+        const connectionEndpoint = network === "mainnet"
+                ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+                : clusterApiUrl(networkConnection);
+            const connection = new Connection(connectionEndpoint, "confirmed");
 
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;

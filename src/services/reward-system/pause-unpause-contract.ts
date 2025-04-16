@@ -17,7 +17,10 @@ interface PauseUnpauseContractProps {
 export const pauseUnpauseContract = async ({ program, provider, pause, network }: PauseUnpauseContractProps) => {
     try {
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+        const connectionEndpoint = network === "mainnet"
+            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+            : clusterApiUrl(networkConnection);
+        const connection = new Connection(connectionEndpoint, "confirmed");
         const [adminAccountPDA] = PublicKey.findProgramAddressSync(
             [Buffer.from("admin_account")],
             program.programId

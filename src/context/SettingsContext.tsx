@@ -74,7 +74,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         isSettingsCompleted: false,
         contractId: "",
         tokenId: "",
-        network: "devnet",
+        network
       });
     }
   }, [provider?.publicKey]);

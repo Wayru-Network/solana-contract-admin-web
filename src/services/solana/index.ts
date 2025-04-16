@@ -9,8 +9,11 @@ export const getTokenDetails = async (
     network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
     programId: string
 ) => {
-    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+  const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+  const connectionEndpoint = network === "mainnet"
+      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+      : clusterApiUrl(networkConnection);
+    const connection = new Connection(connectionEndpoint, "confirmed");
 
     try {
         const tokenPublicKey = new PublicKey(tokenAddress);
@@ -47,8 +50,11 @@ export const getTxStatus = async (
     network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
     maxRetries: number = 30
 ): Promise<TransactionStatus> => {
-    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+  const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+  const connectionEndpoint = network === "mainnet"
+      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+      : clusterApiUrl(networkConnection);
+    const connection = new Connection(connectionEndpoint, "confirmed");
     let status = await connection.getSignatureStatus(signature);
     let retries = maxRetries;
 
@@ -78,8 +84,11 @@ export const getTokenBalance = async (
     network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 ): Promise<TokenBalanceInfo> => {
     try {
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+      const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+      const connectionEndpoint = network === "mainnet"
+          ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+          : clusterApiUrl(networkConnection);
+        const connection = new Connection(connectionEndpoint, "confirmed");
 
         // Get token storage PDA - Ensure seeds are exactly the same
         const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(
@@ -154,7 +163,10 @@ export const checkMintKeyStatus = async (
 ): Promise<MintKeyStatus> => {
   try {
     const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+    const connectionEndpoint = network === "mainnet"
+        ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+        : clusterApiUrl(networkConnection);
+    const connection = new Connection(connectionEndpoint, "confirmed");
     
     // Convert array to keypair if necessary
     const mintKeypair = Array.isArray(keypair) 
