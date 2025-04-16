@@ -8,8 +8,12 @@ import { ContractDetails } from "../../interfaces/reward-system/program";
 import { getTokenBalance } from "../solana";
 import { CONSTANTS } from "../../constants";
 
-export const getRewardSystemProgram = async (rewardSystemProgramId: string, publicKey: string | anchor.web3.PublicKey) => {
-    const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+export const getRewardSystemProgram = async (rewardSystemProgramId: string, publicKey: string | anchor.web3.PublicKey, network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]) => {
+    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+    const connectionEndpoint = network === "mainnet"
+        ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+        : clusterApiUrl(networkConnection);
+    const connection = new Connection(connectionEndpoint, "confirmed");
 
     // Ensure publicKey is a valid PublicKey object
     const walletPublicKey = typeof publicKey === 'string'
@@ -50,7 +54,11 @@ interface getAdminAccountStateProps {
 export const getContractDetails = async ({ programId, publicKey, network, tokenId }: getAdminAccountStateProps): Promise<ContractDetails | undefined> => {
     try {
         const tokenBalance = await getTokenBalance(publicKey as PublicKey, new PublicKey(tokenId), network);
-        const connection = new Connection(clusterApiUrl(network === 'mainnet' ? 'mainnet-beta' : 'devnet'));
+        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
+        const connectionEndpoint = network === "mainnet"
+            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+            : clusterApiUrl(networkConnection);
+        const connection = new Connection(connectionEndpoint, "confirmed");
 
         // Get the program details
         let programAccount;
@@ -82,7 +90,8 @@ export const getContractDetails = async ({ programId, publicKey, network, tokenI
         try {
             const program = await getRewardSystemProgram(
                 programId,
-                publicKey
+                publicKey,
+                network
             );
             
             const [adminAccountPDA] = PublicKey.findProgramAddressSync(

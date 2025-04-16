@@ -125,8 +125,6 @@ export const mintTokens = async ({ network, provider, name, symbol, uri, decimal
         const connectionEndpoint = network === "mainnet"
             ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
             : clusterApiUrl(networkConnection);
-
-        console.log('api url', connectionEndpoint);
         const connection = new Connection(connectionEndpoint, "confirmed");
 
         // 1. Get instructions to create the token and metadata

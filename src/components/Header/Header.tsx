@@ -70,7 +70,7 @@ export const HeaderComponent = () => {
           {publicKey ? "Disconnect" : "Connect"}
         </Button>
         <Select
-          value={settings?.network || "devnet"}
+          value={settings?.network || "Mainnet"}
           optionFilterProp="label"
           disabled={true}
           showSearch
@@ -81,7 +81,7 @@ export const HeaderComponent = () => {
             { value: "devnet", label: "Devnet" },
             { value: "mainnet", label: "Mainnet" },
           ]}
-          defaultValue="devnet"
+          defaultValue="Mainnet"
         />
       </div>
     </Header>

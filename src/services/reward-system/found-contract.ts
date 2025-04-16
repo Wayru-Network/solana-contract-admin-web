@@ -40,7 +40,10 @@ export const fundContractToken = async ({
 }: FundTokenStorageProps) => {
     try {
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+        const connectionEndpoint = network === "mainnet"
+            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+            : clusterApiUrl(networkConnection);
+        const connection = new Connection(connectionEndpoint, "confirmed");
 
         // Get token storage PDA
         const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(

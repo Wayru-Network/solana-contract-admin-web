@@ -16,7 +16,10 @@ interface InitializeContractProps {
 export const initializeContract = async ({ program, provider, tokenMint, network }: InitializeContractProps) => {
     try {
         const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connection = new Connection(clusterApiUrl(networkConnection), "confirmed");
+        const connectionEndpoint = network === "mainnet"
+            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
+            : clusterApiUrl(networkConnection);
+        const connection = new Connection(connectionEndpoint, "confirmed");
 
         const [adminAccountPda] = PublicKey.findProgramAddressSync(
             [Buffer.from("admin_account")],
