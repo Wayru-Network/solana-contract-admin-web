@@ -72,6 +72,7 @@ export const HeaderComponent = () => {
         <Select
           value={settings?.network || "devnet"}
           optionFilterProp="label"
+          disabled={true}
           showSearch
           onChange={(value) => {
             changeNetwork(value as "devnet" | "mainnet");
