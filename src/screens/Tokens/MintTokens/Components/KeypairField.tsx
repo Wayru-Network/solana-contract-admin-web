@@ -1,5 +1,5 @@
 import { Form, Input } from "antd";
-import { getWalletFromUnit8Array, MintKeyStatus } from "../../../services/solana";
+import { getWalletFromUnit8Array, MintKeyStatus } from "../../../../services/solana";
 import { KeypairStatus } from "./KeypairStatus";
 
 interface KeypairFieldProps {
