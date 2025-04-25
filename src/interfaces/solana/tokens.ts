@@ -41,3 +41,10 @@ export interface CreateATAInstructionsParams {
     owner: PublicKey;
     payer: PublicKey;
 }
+
+export interface UpdateTokenURIProps {
+    network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"];
+    provider: Provider; // Wallet provider (like Phantom)
+    mint: PublicKey; // Mint address of the token
+    newUri: string;  // New URI to update to
+}
