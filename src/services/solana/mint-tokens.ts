@@ -4,7 +4,7 @@ import { createInitializeMintInstruction, getMinimumBalanceForRentExemptMint, MI
 import { createCreateMetadataAccountV3Instruction, PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 import { getTxStatus } from ".";
-import { CreateATAInstructionsParams, CreateMintToInstructionParams, CreateTokenWithMetadataParams, MintTokensProps } from "../../interfaces/solana/mint-tokens";
+import { CreateATAInstructionsParams, CreateMintToInstructionParams, CreateTokenWithMetadataParams, MintTokensProps } from "../../interfaces/solana/tokens";
 
 
 const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals, connection, provider, customMintKeypair }: CreateTokenWithMetadataParams) => {
