@@ -1,8 +1,8 @@
 import { LoadingOutlined } from "@ant-design/icons";
-import { MintKeyStatus } from "../../../services/solana";
-import { theme as appTheme } from "../../../styles/theme";
+import { MintKeyStatus } from "../../../../services/solana";
+import { theme as appTheme } from "../../../../styles/theme";
 import { Typography, Spin } from "antd";
-import { formatWalletAddress } from "../../../helpers/wallet";
+import { formatWalletAddress } from "../../../../helpers/wallet";
 
 interface KeypairStatusProps {
     mintKeypairAddress: string;

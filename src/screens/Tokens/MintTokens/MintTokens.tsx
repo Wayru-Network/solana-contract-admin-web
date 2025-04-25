@@ -1,21 +1,21 @@
 import { Form, Typography } from "antd";
-import { FormCard } from "../../components/FormCard/FormCard";
-import { FormScreenWrapper } from "../../components/Wrappers/FormScreenWrapper";
-import { useGlobalProgress } from "../../hooks/useGlobalProgress";
-import { mintTokens } from "../../services/solana/mint-tokens";
-import { CONSTANTS } from "../../constants";
-import { useSettings } from "../../hooks/useSettings";
-import { usePhantom } from "../../hooks/usePhantom";
-import { theme as appTheme } from "../../styles/theme";
+import { FormCard } from "../../../components/FormCard/FormCard";
+import { FormScreenWrapper } from "../../../components/Wrappers/FormScreenWrapper";
+import { useGlobalProgress } from "../../../hooks/useGlobalProgress";
+import { mintTokens } from "../../../services/solana/mint-tokens";
+import { CONSTANTS } from "../../../constants";
+import { useSettings } from "../../../hooks/useSettings";
+import { usePhantom } from "../../../hooks/usePhantom";
+import { theme as appTheme } from "../../../styles/theme";
 import { PublicKey } from "@solana/web3.js";
 import { useState, useEffect, useTransition, useCallback } from "react";
 import {
   getWalletFromUnit8Array,
   checkMintKeyStatus,
   MintKeyStatus,
-} from "../../services/solana";
+} from "../../../services/solana";
 import { FormValues, MintTokensForm } from "./Components/MintTokensForm";
-import { Provider } from "../../interfaces/phantom/phantom";
+import { Provider } from "../../../interfaces/phantom/phantom";
 
 
 const MintTokens = () => {

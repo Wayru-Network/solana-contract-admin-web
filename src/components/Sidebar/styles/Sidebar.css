@@ -1,0 +1,23 @@
+.custom-sidebar-menu.ant-menu.ant-menu-dark .ant-menu-item-selected {
+  background-color: transparent !important;
+}
+
+.custom-sidebar-menu.ant-menu.ant-menu-dark .ant-menu-item-selected {
+  background-color: transparent !important;
+}
+
+/* Style for dropdown menu */
+.ant-dropdown .ant-dropdown-menu {
+  background-color: rgba(190, 188, 188, 0.8) !important; /* White with 80% opacity */
+  backdrop-filter: blur(4px); /* Optional blur effect for better appearance */
+}
+
+/* Style for dropdown menu items when hovering */
+.ant-dropdown .ant-dropdown-menu-item:hover {
+  background-color: rgba(240, 240, 240, 0.9) !important;
+}
+
+.ant-dropdown-menu-item-active {
+  background-color: rgba(240, 240, 240, 0.9)  !important;
+  font-weight: bold;
+}

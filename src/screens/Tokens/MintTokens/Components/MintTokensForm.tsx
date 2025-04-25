@@ -2,10 +2,10 @@ import { Col } from "antd";
 import { Row } from "antd";
 import { Form, FormInstance, Input } from "antd";
 import { PublicKey } from "@solana/web3.js";
-import { MintKeyStatus } from "../../../services/solana";
+import { MintKeyStatus } from "../../../../services/solana";
 import { KeypairField } from "./KeypairField";
-import Button from "../../../components/UI/Button";
-import { Provider } from "../../../interfaces/phantom/phantom";
+import Button from "../../../../components/UI/Button";
+import { Provider } from "../../../../interfaces/phantom/phantom";
 
 export interface FormValues {
   totalSupply: string;
