@@ -4,13 +4,12 @@ import { Program } from "@coral-xyz/anchor/dist/cjs/program";
 import { Provider } from "../../interfaces/phantom/phantom";
 import {
     PublicKey,
-    Connection,
-    clusterApiUrl,
     Transaction,
     SystemProgram,
 } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants";
 import { getTxStatus } from "../solana";
+import { getSolanaConnection } from "../solana/solana.connection";
 
 interface AddMintAuthorityProps {
     program: Program<RewardSystem>;
@@ -38,11 +37,7 @@ export const AddMintAuthority = async ({
 
         // verify that the admin account exists
         try {
-            const adminAccount = await program.account.adminAccount.fetch(adminAccountPDA);
-            console.log("Admin account exists:", {
-                adminPDA: adminAccountPDA.toString(),
-                currentAuthorities: adminAccount.mintAuthorities?.map(a => a.toString())
-            });
+            await program.account.adminAccount.fetch(adminAccountPDA);
         } catch (e) {
             console.error("Error fetching admin account:", e);
             throw new Error("Admin account not found or not initialized");
@@ -53,8 +48,6 @@ export const AddMintAuthority = async ({
             adminAccount: adminAccountPDA,
             systemProgram: SystemProgram.programId,
         };
-
-        console.log("Building transaction with accounts:", accounts);
 
         try {
             // build the instruction
@@ -67,19 +60,13 @@ export const AddMintAuthority = async ({
             const transaction = new Transaction();
             transaction.add(ix);
 
-            const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-            const connectionEndpoint = network === "mainnet"
-                ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-                : clusterApiUrl(networkConnection);
-            const connection = new Connection(connectionEndpoint, "confirmed");
+            const connection = getSolanaConnection(network);
 
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = provider.publicKey;
 
-            console.log("Attempting to sign and send transaction...");
             const { signature } = await provider.signAndSendTransaction(transaction);
-            console.log("Transaction sent with signature:", signature);
 
             return await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
         } catch (txError) {
@@ -130,8 +117,6 @@ export const removeMintAuthority = async ({
             systemProgram: SystemProgram.programId,
         };
 
-        console.log("Building transaction with accounts:", accounts);
-
         try {
             // build the instruction
             const ix = await program.methods
@@ -143,19 +128,13 @@ export const removeMintAuthority = async ({
             const transaction = new Transaction();
             transaction.add(ix);
 
-            const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-                ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-                : clusterApiUrl(networkConnection);
-            const connection = new Connection(connectionEndpoint, "confirmed");
+            const connection = getSolanaConnection(network);
 
             const { blockhash } = await connection.getLatestBlockhash();
             transaction.recentBlockhash = blockhash;
             transaction.feePayer = provider.publicKey;
 
-            console.log("Attempting to sign and send transaction...");
             const { signature } = await provider.signAndSendTransaction(transaction);
-            console.log("Transaction sent with signature:", signature);
 
             return await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
         } catch (txError) {

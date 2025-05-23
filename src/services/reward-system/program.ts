@@ -1,19 +1,14 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor/dist/cjs/program";
-
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
-import { clusterApiUrl } from "@solana/web3.js";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { ContractDetails } from "../../interfaces/reward-system/program";
 import { getTokenBalance } from "../solana";
 import { CONSTANTS } from "../../constants";
+import { getSolanaConnection } from "../solana/solana.connection";
 
 export const getRewardSystemProgram = async (rewardSystemProgramId: string, publicKey: string | anchor.web3.PublicKey, network: keyof  CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]) => {
-    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connectionEndpoint = network === "mainnet"
-        ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-        : clusterApiUrl(networkConnection);
-    const connection = new Connection(connectionEndpoint, "confirmed");
+    const connection = getSolanaConnection(network);
 
     // Ensure publicKey is a valid PublicKey object
     const walletPublicKey = typeof publicKey === 'string'
@@ -54,11 +49,7 @@ interface getAdminAccountStateProps {
 export const getContractDetails = async ({ programId, publicKey, network, tokenId }: getAdminAccountStateProps): Promise<ContractDetails | undefined> => {
     try {
         const tokenBalance = await getTokenBalance(publicKey as PublicKey, new PublicKey(tokenId), network);
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-            : clusterApiUrl(networkConnection);
-        const connection = new Connection(connectionEndpoint, "confirmed");
+        const connection = getSolanaConnection(network);
 
         // Get the program details
         let programAccount;

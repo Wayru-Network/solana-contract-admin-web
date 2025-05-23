@@ -37,19 +37,20 @@ const Settings = () => {
     startTransition(async () => {
       setIsError(false);
       // Simulate a network request
-      localStorage.setItem("programId", values.contractId);
-      localStorage.setItem("tokenId", values.token);
+      const network = settings?.network ?? "devnet";
       const tokenDetails = await getTokenDetails(
         values.token,
-        "devnet",
+        network,
         values.contractId
       );
       if (!tokenDetails) return setIsError(true);
+      localStorage.setItem("programId", values.contractId);
+      localStorage.setItem("tokenId", values.token);
 
       setSettings({
         contractId: values.contractId,
         tokenId: values.token,
-        network: "devnet",
+        network: network,
         isSettingsCompleted: true,
         tokenDetails: tokenDetails,
       });
@@ -77,7 +78,7 @@ const Settings = () => {
       const program = await getRewardSystemProgram(
         settings?.contractId as string,
         provider.publicKey as PublicKey,
-        "mainnet"
+        settings?.network ?? "devnet"
       );
       // await 1/2 second
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -385,28 +386,33 @@ const Settings = () => {
                     {settings.tokenDetails?.contractTokenBalance}
                   </Typography.Text>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography.Text>Contract Status:</Typography.Text>
-                  <Switch
+                {
+                  settings?.contractDetails?.programDetails?.upgradeAuthority && (
+                    <div
                     style={{
-                      borderColor: appTheme.palette.wayru.outline,
-                      borderWidth: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
                     }}
-                    className="custom-switch"
-                    checkedChildren="Active"
-                    unCheckedChildren="Paused"
-                    checked={isSwitchOn}
-                    onChange={(checked) => {
-                      handlePauseUnpause(!checked);
-                    }}
-                  />
-                </div>
+                  >
+                    <Typography.Text>Contract Status:</Typography.Text>
+                    <Switch
+                      style={{
+                        borderColor: appTheme.palette.wayru.outline,
+                        borderWidth: 1,
+                      }}
+                      className="custom-switch"
+                      checkedChildren="Active"
+                      unCheckedChildren="Paused"
+                      checked={isSwitchOn}
+                      onChange={(checked) => {
+                        handlePauseUnpause(!checked);
+                      }}
+                    />
+                  </div>
+                  )
+                }
+              
               </>
             )}
           </div>

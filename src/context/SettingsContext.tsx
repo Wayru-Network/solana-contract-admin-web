@@ -44,26 +44,24 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const getSettings = useCallback(async () => {
     const programId = localStorage.getItem("programId");
     const tokenId = localStorage.getItem("tokenId");
-    const network = "mainnet"; //localStorage.getItem("network") ?? "mainnet";
+    const network = (localStorage.getItem("network") as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]) || "mainnet";
     if (programId && tokenId && network) {
       startTransition(async () => {
         const tokenDetails = await getTokenDetails(
           tokenId,
-          network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          network,
           programId
         );
         const contractDetails = await getContractDetails({
           programId,
           publicKey: provider?.publicKey as PublicKey,
-          network:
-            network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          network: network,
           tokenId: tokenId,
         });
         setSettings({
           contractId: programId,
           tokenId: tokenId,
-          network:
-            network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
+          network: network,
           isSettingsCompleted: true,
           tokenDetails: tokenDetails,
           contractDetails: contractDetails,
@@ -91,9 +89,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const deleteSettings = useCallback(async () => {
     localStorage.removeItem("programId");
     localStorage.removeItem("tokenId");
-    localStorage.removeItem("network");
-    setSettings(null);
-  }, []);
+    setSettings({
+      isSettingsCompleted: false,
+      contractId: "",
+      tokenId: "",
+      network: settings?.network ?? "devnet",
+    });
+  }, [settings?.network]);
 
   return (
     <SettingsContext.Provider
