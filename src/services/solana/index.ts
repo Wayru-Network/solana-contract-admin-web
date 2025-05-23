@@ -1,80 +1,92 @@
-import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
-import { CONSTANTS } from '../../constants';
-import { TokenBalanceInfo, TransactionStatus } from '../../interfaces/solana';
-import { Metadata } from '@metaplex-foundation/mpl-token-metadata';
+import { Keypair, PublicKey } from "@solana/web3.js";
+import {
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress,
+  getMint,
+} from "@solana/spl-token";
+import { CONSTANTS } from "../../constants";
+import { TokenBalanceInfo, TransactionStatus } from "../../interfaces/solana";
+import { Metadata } from "@metaplex-foundation/mpl-token-metadata";
+import { getSolanaConnection } from "./solana.connection";
 
 export const getTokenDetails = async (
   tokenAddress: string,
   network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
   programId: string
 ) => {
-  const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-  const connectionEndpoint = network === "mainnet"
-    ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-    : clusterApiUrl(networkConnection);
-  const connection = new Connection(connectionEndpoint, "confirmed");
+  const connection = getSolanaConnection(network);
 
   try {
+    console.log('tokenAddress', tokenAddress);
     const tokenPublicKey = new PublicKey(tokenAddress);
+    console.log('programId', programId);
     const programPublicKey = new PublicKey(programId);
 
     // get balance of the token in the contract
-    const tokenBalance = await getTokenBalance(programPublicKey, tokenPublicKey, network);
+    const tokenBalance = await getTokenBalance(
+      programPublicKey,
+      tokenPublicKey,
+      network
+    );
 
     // get token info using getMint
     const tokenInfo = await getMint(
       connection,
       tokenPublicKey,
-      'confirmed',
+      "confirmed",
       TOKEN_PROGRAM_ID
     );
 
     return {
       address: tokenAddress,
       decimals: tokenInfo.decimals,
-      supply: (Number(tokenInfo.supply) / Math.pow(10, tokenInfo.decimals)).toLocaleString(),
+      supply: (
+        Number(tokenInfo.supply) / Math.pow(10, tokenInfo.decimals)
+      ).toLocaleString(),
       isInitialized: !tokenInfo.isInitialized,
       freezeAuthority: tokenInfo.freezeAuthority?.toBase58(),
       mintAuthority: tokenInfo.mintAuthority?.toBase58(),
-      contractTokenBalance: Number(tokenBalance.uiAmount).toLocaleString() ?? 0
+      contractTokenBalance: Number(tokenBalance.uiAmount).toLocaleString() ?? 0,
     };
   } catch (error) {
-    console.error('error getting token details:', error);
+    console.error("Error getting token details:", {
+      error,
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : "Unknown error type",
+    });
     return undefined;
   }
-}
+};
 
 export const getTxStatus = async (
   signature: string,
   network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"],
   maxRetries: number = 30
 ): Promise<TransactionStatus> => {
-  const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-  const connectionEndpoint = network === "mainnet"
-    ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-    : clusterApiUrl(networkConnection);
-  const connection = new Connection(connectionEndpoint, "confirmed");
+  const connection = getSolanaConnection(network);
   let status = await connection.getSignatureStatus(signature);
   let retries = maxRetries;
 
-  while (retries > 0 && status.value?.confirmationStatus !== 'confirmed') {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  while (retries > 0 && status.value?.confirmationStatus !== "confirmed") {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     status = await connection.getSignatureStatus(signature);
 
     if (status.value?.err) {
-      throw new Error(`Transaction failed: ${JSON.stringify(status.value.err)}`);
+      throw new Error(
+        `Transaction failed: ${JSON.stringify(status.value.err)}`
+      );
     }
 
     retries--;
     if (retries === 0) {
-      throw new Error('Transaction confirmation timeout');
+      throw new Error("Transaction confirmation timeout");
     }
   }
 
   return {
     signature,
-    status: status.value?.confirmationStatus
+    status: status.value?.confirmationStatus,
   };
 };
 
@@ -84,11 +96,7 @@ export const getTokenBalance = async (
   network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 ): Promise<TokenBalanceInfo> => {
   try {
-    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connectionEndpoint = network === "mainnet"
-      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-      : clusterApiUrl(networkConnection);
-    const connection = new Connection(connectionEndpoint, "confirmed");
+    const connection = getSolanaConnection(network);
 
     // Get token storage PDA - Ensure seeds are exactly the same
     const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(
@@ -111,7 +119,7 @@ export const getTokenBalance = async (
         uiAmount: 0,
         decimals: 0,
         exists: false,
-        address: storageAccount.toString()
+        address: storageAccount.toString(),
       };
     }
 
@@ -121,7 +129,7 @@ export const getTokenBalance = async (
       uiAmount: balance.value.uiAmount,
       decimals: balance.value.decimals,
       exists: true,
-      address: storageAccount.toString()
+      address: storageAccount.toString(),
     };
   } catch (error) {
     console.error("Error in getTokenBalance:", error);
@@ -130,10 +138,8 @@ export const getTokenBalance = async (
 };
 
 export const getWalletFromUnit8Array = (unit: number[]) => {
-  return Keypair.fromSecretKey(
-    Uint8Array.from(unit)
-  );
-}
+  return Keypair.fromSecretKey(Uint8Array.from(unit));
+};
 
 export interface MintKeyStatus {
   exists: boolean;
@@ -162,11 +168,7 @@ export const checkMintKeyStatus = async (
   network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 ): Promise<MintKeyStatus> => {
   try {
-    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connectionEndpoint = network === "mainnet"
-      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-      : clusterApiUrl(networkConnection);
-    const connection = new Connection(connectionEndpoint, "confirmed");
+    const connection = getSolanaConnection(network);
 
     // Convert array to keypair if necessary
     const mintKeypair = Array.isArray(keypair)
@@ -180,7 +182,7 @@ export const checkMintKeyStatus = async (
       return {
         exists: false,
         isToken: false,
-        message: ""
+        message: "",
       };
     }
 
@@ -191,7 +193,7 @@ export const checkMintKeyStatus = async (
         const tokenInfo = await getMint(
           connection,
           mintKeypair.publicKey,
-          'confirmed',
+          "confirmed",
           TOKEN_PROGRAM_ID
         );
 
@@ -199,7 +201,9 @@ export const checkMintKeyStatus = async (
         const [metadataAddress] = PublicKey.findProgramAddressSync(
           [
             Buffer.from("metadata"),
-            new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s").toBuffer(),
+            new PublicKey(
+              "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+            ).toBuffer(),
             mintKeypair.publicKey.toBuffer(),
           ],
           new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
@@ -215,9 +219,9 @@ export const checkMintKeyStatus = async (
           try {
             // Deserialize the metadata account data
             const metadata = Metadata.deserialize(metadataInfo.data)[0];
-            tokenName = metadata.data.name.replace(/\0/g, ''); // Remove null terminators
-            tokenSymbol = metadata.data.symbol.replace(/\0/g, '');
-            tokenUri = metadata.data.uri.replace(/\0/g, '');
+            tokenName = metadata.data.name.replace(/\0/g, ""); // Remove null terminators
+            tokenSymbol = metadata.data.symbol.replace(/\0/g, "");
+            tokenUri = metadata.data.uri.replace(/\0/g, "");
           } catch (metadataError) {
             console.error("Error deserializing metadata:", metadataError);
           }
@@ -229,24 +233,27 @@ export const checkMintKeyStatus = async (
           tokenDetails: {
             address: mintKeypair.publicKey.toString(),
             decimals: tokenInfo.decimals,
-            supply: (Number(tokenInfo.supply) / Math.pow(10, tokenInfo.decimals)).toLocaleString(),
+            supply: (
+              Number(tokenInfo.supply) / Math.pow(10, tokenInfo.decimals)
+            ).toLocaleString(),
             mintAuthority: tokenInfo.mintAuthority?.toBase58(),
             freezeAuthority: tokenInfo.freezeAuthority?.toBase58(),
             hasMetadata: metadataInfo !== null,
             name: tokenName || undefined,
             symbol: tokenSymbol || undefined,
-            uri: tokenUri || undefined
+            uri: tokenUri || undefined,
           },
-          message: metadataInfo !== null
-            ? ``
-            : "This keypair already has a token without metadata"
+          message:
+            metadataInfo !== null
+              ? ``
+              : "This keypair already has a token without metadata",
         };
       } catch (error) {
         console.error("Error checking mint key status:", error);
         return {
           exists: true,
           isToken: false,
-          message: "This keypair has an account but it's not a valid token"
+          message: "This keypair has an account but it's not a valid token",
         };
       }
     }
@@ -254,29 +261,26 @@ export const checkMintKeyStatus = async (
     return {
       exists: true,
       isToken: false,
-      message: "This keypair has an account but it's not a token"
+      message: "This keypair has an account but it's not a token",
     };
   } catch (error) {
     console.error("Error checking mint key status:", error);
     return {
       exists: false,
       isToken: false,
-      message: `Error checking keypair: ${error instanceof Error ? error.message : 'An unknown error occurred'}`
+      message: `Error checking keypair: ${
+        error instanceof Error ? error.message : "An unknown error occurred"
+      }`,
     };
   }
 };
-
 
 export const getTokenMetadata = async (
   mint: PublicKey,
   network: keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]
 ) => {
   try {
-    const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-    const connectionEndpoint = network === "mainnet"
-      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-      : clusterApiUrl(networkConnection);
-    const connection = new Connection(connectionEndpoint, "confirmed");
+    const connection = getSolanaConnection(network);
 
     // Check if it has metadata
     const [metadataAddress] = PublicKey.findProgramAddressSync(
@@ -288,33 +292,34 @@ export const getTokenMetadata = async (
       new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
     );
 
-    const metadataInfo = await connection.getAccountInfo(metadataAddress).catch((error) => {
-      console.error("Error getting token metadata:", error);
-      return null;
-    });
+    const metadataInfo = await connection
+      .getAccountInfo(metadataAddress)
+      .catch((error) => {
+        console.error("Error getting token metadata:", error);
+        return null;
+      });
     if (metadataInfo) {
       const metadata = Metadata.deserialize(metadataInfo.data)[0];
 
       return {
         isToken: true,
         metadata: {
-          name: metadata.data.name.replace(/\0/g, ''),
-          symbol: metadata.data.symbol.replace(/\0/g, ''),
-          uri: metadata.data.uri.replace(/\0/g, '')
-        }
+          name: metadata.data.name.replace(/\0/g, ""),
+          symbol: metadata.data.symbol.replace(/\0/g, ""),
+          uri: metadata.data.uri.replace(/\0/g, ""),
+        },
       };
     }
 
     return {
       isToken: false,
-      metadata: undefined
-    }
+      metadata: undefined,
+    };
   } catch (error) {
     console.error("Error getting token metadata:", error);
     return {
       isToken: false,
-      metadata: undefined
-    }
+      metadata: undefined,
+    };
   }
-}
-
+};

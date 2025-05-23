@@ -1,8 +1,6 @@
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
-import { Program } from "@coral-xyz/anchor/dist/cjs/program";
-
+import { Program } from "@coral-xyz/anchor";
 import { Provider } from "../../interfaces/phantom/phantom";
-
 import { BN } from "@coral-xyz/anchor";
 import {
     TOKEN_PROGRAM_ID,
@@ -15,11 +13,10 @@ import {
     PublicKey,
     TransactionInstruction,
     SystemProgram,
-    Connection,
-    clusterApiUrl,
 } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants";
 import { getTxStatus } from "../solana";
+import { getSolanaConnection } from "../solana/solana.connection";
 
 interface FundTokenStorageProps {
     program: Program<RewardSystem>;
@@ -39,11 +36,7 @@ export const fundContractToken = async ({
     network
 }: FundTokenStorageProps) => {
     try {
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-            : clusterApiUrl(networkConnection);
-        const connection = new Connection(connectionEndpoint, "confirmed");
+        const connection = getSolanaConnection(network);
 
         // Get token storage PDA
         const [tokenStorageAuthority] = PublicKey.findProgramAddressSync(
@@ -74,7 +67,6 @@ export const fundContractToken = async ({
         const preInstructions: TransactionInstruction[] = [];
 
         // If the storage account does not exist, create the instruction to create it
-        console.log("storageAccountInfo", storageAccountInfo);
         if (!storageAccountInfo) {
             preInstructions.push(
                 createAssociatedTokenAccountInstruction(
@@ -90,7 +82,7 @@ export const fundContractToken = async ({
         // Check userATA
         try {
             await getAccount(
-                program.provider.connection,
+                connection,
                 userATA,
                 'confirmed',
                 TOKEN_PROGRAM_ID

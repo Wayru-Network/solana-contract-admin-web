@@ -1,8 +1,9 @@
-import { Connection, PublicKey, Transaction, clusterApiUrl } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants";
 import { createUpdateMetadataAccountV2Instruction, PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 import { UpdateTokenURIProps } from "../../interfaces/solana/tokens";
 import { getTokenMetadata, getTxStatus } from ".";
+import { getSolanaConnection } from "./solana.connection";
 
 
 export const updateTokenURI = async ({ 
@@ -13,18 +14,15 @@ export const updateTokenURI = async ({
 }: UpdateTokenURIProps) => {
     try {
         // Setup connection
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-            : clusterApiUrl(networkConnection);
-        console.log('connectionEndpoint', connectionEndpoint);
-        console.log('network', network);
-        const connection = new Connection(connectionEndpoint, "confirmed");
+        const connection = getSolanaConnection(network);
 
         const {isToken, metadata} = await getTokenMetadata(mint, network);
         if (!isToken || !metadata) {
             throw new Error("Mint key status is not a token");
         }
+
+        console.log('Current metadata:', metadata);
+        console.log('New URI:', newUri);
 
         // Derive metadata account PDA
         const [metadataAddress] = PublicKey.findProgramAddressSync(
@@ -36,6 +34,8 @@ export const updateTokenURI = async ({
             TOKEN_METADATA_PROGRAM_ID
         );
         
+        console.log('Metadata Address:', metadataAddress.toString());
+        console.log('Update Authority:', provider.publicKey.toString());
 
         // Create update metadata instruction
         const updateMetadataInstruction = createUpdateMetadataAccountV2Instruction(
@@ -65,17 +65,37 @@ export const updateTokenURI = async ({
         const transaction = new Transaction();
         transaction.add(updateMetadataInstruction);
 
-        const { blockhash } = await connection.getLatestBlockhash();
+        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = provider.publicKey;
+        transaction.lastValidBlockHeight = lastValidBlockHeight;
 
         // Sign and send transaction
         try {
+            console.log('Sending transaction...');
             const { signature } = await provider.signAndSendTransaction(transaction);
+            console.log('Transaction signature:', signature);
+            
+            // Esperar a que la transacción se confirme
+            const confirmation = await connection.confirmTransaction({
+                signature,
+                blockhash,
+                lastValidBlockHeight
+            });
+            
+            console.log('Transaction confirmation:', confirmation);
+            
             const txStatus = await getTxStatus(signature, network as keyof CONSTANTS["NETWORK"]["EXPLORER_ACCOUNT_URL"]);
             return { txStatus };
         } catch (error) {
             console.error("Error in signature:", error);
+            if (error instanceof Error) {
+                console.error("Error details:", {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
+            }
             return {
                 txStatus: {
                     status: 'exception',

@@ -1,10 +1,11 @@
-import { Connection, PublicKey, Transaction, clusterApiUrl } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants";
 import { createInitializeMintInstruction, getMinimumBalanceForRentExemptMint, MINT_SIZE, TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, createMintToInstruction, createSetAuthorityInstruction, AuthorityType } from "@solana/spl-token";
 import { createCreateMetadataAccountV3Instruction, PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 import { getTxStatus } from ".";
 import { CreateATAInstructionsParams, CreateMintToInstructionParams, CreateTokenWithMetadataParams, MintTokensProps } from "../../interfaces/solana/tokens";
+import { getSolanaConnection } from "./solana.connection";
 
 
 const createTokenWithMetadataInstructions = async ({ name, symbol, uri, decimals, connection, provider, customMintKeypair }: CreateTokenWithMetadataParams) => {
@@ -121,11 +122,7 @@ const createMintToInstructions = ({ mint, destination, authority, amount, decima
  */
 export const mintTokens = async ({ network, provider, name, symbol, uri, decimals, amount, recipientAddress, customMintKeypair }: MintTokensProps) => {
     try {
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-            : clusterApiUrl(networkConnection);
-        const connection = new Connection(connectionEndpoint, "confirmed");
+        const connection = getSolanaConnection(network);
 
         // 1. Get instructions to create the token and metadata
         const { instructions: createTokenInstructions, mintKeypair } =

@@ -37,16 +37,10 @@ const AuthorityConfigs: React.FC = () => {
           return;
         }
         setProgressState({ percent: 8 });
-        console.log("Starting submission with values:", values);
-        console.log("Provider state:", {
-          isConnected: provider?.isConnected,
-          publicKey: provider?.publicKey?.toString(),
-        });
-
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
           provider.publicKey as PublicKey,
-          "mainnet"
+          settings?.network ?? "devnet"
         );
         setProgressState({ percent: 25 });
 
@@ -58,9 +52,7 @@ const AuthorityConfigs: React.FC = () => {
         });
         setProgressState({ percent: 70 });
 
-        console.log("Transaction completed:", txStatus);
         if (txStatus.status === "confirmed") {
-          console.log("Refreshing settings state");
           await refreshSettingsState();
           form.resetFields();
           setProgressState({ percent: 100, status: 'success' });
@@ -81,11 +73,11 @@ const AuthorityConfigs: React.FC = () => {
           return;
         }
         setProgressState({ percent: 10 });
-        console.log("authority", authority);
+
         const program = await getRewardSystemProgram(
           settings?.contractId as string,
           provider?.publicKey as PublicKey,
-          "mainnet"
+          settings?.network ?? "devnet"
         );
         setProgressState({ percent: 25 });
         const txStatus = await removeMintAuthority({
@@ -96,11 +88,10 @@ const AuthorityConfigs: React.FC = () => {
         });
         setProgressState({ percent: 70 });
         if (txStatus.status === "confirmed") {
-          console.log("Refreshing settings state");
           await refreshSettingsState();
           setProgressState({ percent: 100, status: 'success' });
         }
-        console.log("Transaction completed:", txStatus);
+
         message.success("Authority removed successfully");
       } catch (error) {
         console.error("Error removing authority:", error);

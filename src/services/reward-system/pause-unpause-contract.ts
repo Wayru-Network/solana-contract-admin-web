@@ -1,11 +1,10 @@
-import { Program } from "@coral-xyz/anchor/dist/cjs/program";
-
-import { clusterApiUrl, PublicKey, Transaction } from "@solana/web3.js";
+import { Program } from "@coral-xyz/anchor";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants/index";
-import { Connection } from "@solana/web3.js";
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
 import { Provider } from "../../interfaces/phantom/phantom";
 import { getTxStatus } from "../solana";
+import { getSolanaConnection } from "../solana/solana.connection";
 
 interface PauseUnpauseContractProps {
     program: Program<RewardSystem>,
@@ -16,11 +15,7 @@ interface PauseUnpauseContractProps {
 
 export const pauseUnpauseContract = async ({ program, provider, pause, network }: PauseUnpauseContractProps) => {
     try {
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-            : clusterApiUrl(networkConnection);
-        const connection = new Connection(connectionEndpoint, "confirmed");
+        const connection = getSolanaConnection(network);
         const [adminAccountPDA] = PublicKey.findProgramAddressSync(
             [Buffer.from("admin_account")],
             program.programId

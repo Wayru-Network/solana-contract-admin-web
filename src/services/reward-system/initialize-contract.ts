@@ -1,10 +1,11 @@
 import { Provider } from "../../interfaces/phantom/phantom";
 import { RewardSystem } from "../../interfaces/reward-system/reward_system";
-import { clusterApiUrl, Connection, PublicKey, SystemProgram } from "@solana/web3.js";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { CONSTANTS } from "../../constants";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { getTxStatus } from "../solana";
 import { Program } from "@coral-xyz/anchor/dist/cjs/program";
+import { getSolanaConnection } from "../solana/solana.connection";
 
 interface InitializeContractProps {
     program: Program<RewardSystem>,
@@ -15,11 +16,7 @@ interface InitializeContractProps {
 
 export const initializeContract = async ({ program, provider, tokenMint, network }: InitializeContractProps) => {
     try {
-        const networkConnection = network === "mainnet" ? "mainnet-beta" : 'devnet';
-        const connectionEndpoint = network === "mainnet"
-            ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL || ""
-            : clusterApiUrl(networkConnection);
-        const connection = new Connection(connectionEndpoint, "confirmed");
+        const connection = getSolanaConnection(network);
 
         const [adminAccountPda] = PublicKey.findProgramAddressSync(
             [Buffer.from("admin_account")],
@@ -31,7 +28,7 @@ export const initializeContract = async ({ program, provider, tokenMint, network
         );
 
         const accounts = {
-            user: provider?.publicKey,
+            user: provider?.publicKey, 
             adminAccount: adminAccountPda,
             tokenMint: tokenMint,
             tokenProgram: TOKEN_PROGRAM_ID,
