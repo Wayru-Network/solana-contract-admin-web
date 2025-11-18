@@ -257,8 +257,9 @@ const AuthorityConfigs: React.FC = () => {
                   validator: async (_, value) => {
                     if (value) {
                       try {
-                        const isOnCurve = PublicKey.isOnCurve(value);
-                        if (!isOnCurve) {
+                        const isOnCurve = new PublicKey(value);
+                        console.log('address:',isOnCurve)
+                        if (!(isOnCurve.toBase58().length>0)) {
                           throw new Error("Invalid Solana address");
                         }
                       } catch (error) {
